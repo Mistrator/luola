@@ -1,9 +1,11 @@
 use crate::player::Player;
 use luola::constants;
 use luola::messages::*;
+use luola::world::World;
 use std::net::{TcpListener, TcpStream};
 
 mod player;
+mod worldgen;
 
 fn handle_join(mut socket: TcpStream) -> Option<Player> {
     let msg = luola::net::receive(&mut socket);
@@ -83,7 +85,12 @@ fn wait_for_join(n_players: usize) -> Vec<Player> {
 
 fn main() {
     let n_players: usize = 2;
+    let worldgen_seed: u64 = 1;
 
-    let players = wait_for_join(n_players);
+    println!("generating world with seed {}", worldgen_seed);
+    let world: World = worldgen::generate_world(worldgen_seed);
+    println!("world generated with {} layers", world.layers.len());
+
+    let players: Vec<Player> = wait_for_join(n_players);
     println!("{} players connected, ready to start", players.len());
 }
