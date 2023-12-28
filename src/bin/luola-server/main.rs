@@ -1,3 +1,4 @@
+use luola::messages::*;
 use std::net::{TcpListener, TcpStream};
 
 fn wait_for_connections(expected_players: usize) -> Vec<TcpStream> {
@@ -26,6 +27,16 @@ fn wait_for_connections(expected_players: usize) -> Vec<TcpStream> {
 fn main() {
     let player_count: usize = 1;
 
-    let sockets = wait_for_connections(player_count);
-    println!("{}", sockets.len());
+    let mut sockets = wait_for_connections(player_count);
+
+    let msg: Message = luola::net::receive(&mut sockets[0]);
+
+    match msg {
+        Message::Join(join_msg) => {
+            println!(
+                "received join msg, character name: {}, version: {}",
+                join_msg.character_name, join_msg.version
+            );
+        }
+    };
 }
