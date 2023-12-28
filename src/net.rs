@@ -40,7 +40,6 @@ pub fn send(stream: &mut TcpStream, msg: Message) {
                 _ => panic!("failed to send bytes: {:?}", e),
             },
         };
-        println!("sent {} bytes", bytes_written);
         pos += bytes_written;
     }
 }
@@ -60,7 +59,6 @@ fn read_bytes(stream: &mut TcpStream, n_bytes: usize) -> Vec<u8> {
                 _ => panic!("failed to receive bytes: {:?}", e),
             },
         };
-        println!("received {} bytes", bytes_read);
         pos += bytes_read;
     }
 

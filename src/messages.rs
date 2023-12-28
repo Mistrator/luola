@@ -13,13 +13,20 @@ impl Header {
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub enum Message {
     Join(JoinMsg),
+    JoinOk,
+    JoinError(ErrorMsg),
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct JoinMsg {
     pub version: String,
     pub character_name: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ErrorMsg {
+    pub message: String,
 }

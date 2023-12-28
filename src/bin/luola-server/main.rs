@@ -1,7 +1,58 @@
+use crate::player::Player;
+use luola::constants;
 use luola::messages::*;
 use std::net::{TcpListener, TcpStream};
 
-fn wait_for_connections(expected_players: usize) -> Vec<TcpStream> {
+mod player;
+
+fn handle_join(mut socket: TcpStream) -> Option<Player> {
+    let msg = luola::net::receive(&mut socket);
+    match msg {
+        Message::Join(join_msg) => {
+            let server_version = constants::get_version();
+            let client_version = join_msg.version;
+
+            if server_version != client_version {
+                let response_text = format!(
+                    "mismatching game versions: server version {}, client version {}",
+                    server_version, client_version
+                );
+                println!("{}", response_text);
+
+                let response = ErrorMsg {
+                    message: String::from(response_text),
+                };
+                let response = Message::JoinError(response);
+
+                luola::net::send(&mut socket, response);
+                return None;
+            }
+
+            let mut player = Player::new(socket, join_msg.character_name);
+
+            let response = Message::JoinOk;
+            luola::net::send(&mut player.socket, response);
+
+            return Some(player);
+        }
+        other => {
+            println!(
+                "received unexpected message type: expected Message::Join, got {:?}",
+                other
+            );
+
+            let response = ErrorMsg {
+                message: String::from("unexpected message type"),
+            };
+            let response = Message::JoinError(response);
+
+            luola::net::send(&mut socket, response);
+            return None;
+        }
+    }
+}
+
+fn wait_for_join(n_players: usize) -> Vec<Player> {
     let addr = "127.0.0.1:26988";
 
     let listener = match TcpListener::bind(addr) {
@@ -9,34 +60,30 @@ fn wait_for_connections(expected_players: usize) -> Vec<TcpStream> {
         Err(e) => panic!("failed to bind to address {}: {:?}", addr, e),
     };
 
-    let mut sockets: Vec<TcpStream> = Vec::new();
+    let mut players: Vec<Player> = Vec::new();
 
-    while sockets.len() < expected_players {
+    while players.len() < n_players {
         match listener.accept() {
             Ok((socket, addr)) => {
                 println!("new connection from {}", addr);
-                sockets.push(socket);
+                match handle_join(socket) {
+                    Some(player) => {
+                        println!("{} joined the game", player.character.name);
+                        players.push(player);
+                    }
+                    None => println!("{} failed to join the game", addr),
+                }
             }
             Err(e) => println!("failed to accept connection: {:?}", e),
         }
     }
 
-    sockets
+    players
 }
 
 fn main() {
-    let player_count: usize = 1;
+    let n_players: usize = 2;
 
-    let mut sockets = wait_for_connections(player_count);
-
-    let msg: Message = luola::net::receive(&mut sockets[0]);
-
-    match msg {
-        Message::Join(join_msg) => {
-            println!(
-                "received join msg, character name: {}, version: {}",
-                join_msg.character_name, join_msg.version
-            );
-        }
-    };
+    let players = wait_for_join(n_players);
+    println!("{} players connected, ready to start", players.len());
 }

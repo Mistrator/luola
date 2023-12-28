@@ -9,6 +9,19 @@ fn join(stream: &mut TcpStream) {
     });
 
     luola::net::send(stream, join_msg);
+
+    let response = luola::net::receive(stream);
+    match response {
+        Message::JoinOk => {
+            println!("successfully joined the game");
+        }
+        Message::JoinError(err) => {
+            println!("failed to join the game: {}", err.message);
+        }
+        other => {
+            println!("unexpected message type: {:?}", other);
+        }
+    }
 }
 
 fn open_stream() -> TcpStream {
