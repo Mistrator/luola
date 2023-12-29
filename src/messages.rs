@@ -1,3 +1,4 @@
+use crate::world::Layer;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -19,6 +20,7 @@ pub enum Message {
     Join(JoinMsg),
     JoinOk,
     JoinError(ErrorMsg),
+    GameState(GameStateMsg),
 }
 
 impl fmt::Display for Message {
@@ -27,6 +29,7 @@ impl fmt::Display for Message {
             Message::Join(_) => "Join",
             Message::JoinOk => "JoinOk",
             Message::JoinError(_) => "JoinError",
+            Message::GameState(_) => "GameState",
         };
 
         write!(f, "{}", variant)
@@ -42,4 +45,9 @@ pub struct JoinMsg {
 #[derive(Deserialize, Serialize)]
 pub struct ErrorMsg {
     pub message: String,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct GameStateMsg {
+    pub layer: Layer,
 }

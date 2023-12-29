@@ -9,7 +9,7 @@ pub enum Tile {
     Wall,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub struct GridSquare {
     pub y: i32,
     pub x: i32,
@@ -38,7 +38,7 @@ pub struct World {
     pub layers: Vec<Layer>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub struct Layer {
     grid: Vec<Vec<Tile>>,
     creatures: HashMap<u128, Creature>,

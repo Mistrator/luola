@@ -1,6 +1,22 @@
 use luola::constants;
 use luola::messages::*;
+use luola::world::Layer;
 use std::net::TcpStream;
+
+fn receive_game_state(stream: &mut TcpStream) {
+    let msg = luola::net::receive(stream);
+
+    match msg {
+        Message::GameState(state) => {
+            let layer: Layer = state.layer;
+            println!("received game state");
+            println!("{}", layer);
+        }
+        other => {
+            println!("received unexpected message type: {}", other);
+        }
+    }
+}
 
 fn join(stream: &mut TcpStream) {
     let join_msg = Message::Join(JoinMsg {
@@ -8,7 +24,7 @@ fn join(stream: &mut TcpStream) {
         character_name: String::from("testcharacter"),
     });
 
-    luola::net::send(stream, join_msg);
+    luola::net::send(stream, &join_msg);
 
     let response = luola::net::receive(stream);
     match response {
@@ -37,4 +53,5 @@ fn open_stream() -> TcpStream {
 fn main() {
     let mut stream = open_stream();
     join(&mut stream);
+    receive_game_state(&mut stream);
 }

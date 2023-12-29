@@ -1,7 +1,7 @@
 use crate::player::Player;
 use luola::constants;
 use luola::messages::*;
-use luola::world::World;
+use luola::world::{Layer, World};
 use std::net::{TcpListener, TcpStream};
 
 mod player;
@@ -26,14 +26,14 @@ fn handle_join(mut socket: TcpStream) -> Option<Player> {
                 };
                 let response = Message::JoinError(response);
 
-                luola::net::send(&mut socket, response);
+                luola::net::send(&mut socket, &response);
                 return None;
             }
 
             let mut player = Player::new(socket, join_msg.character_name);
 
             let response = Message::JoinOk;
-            luola::net::send(&mut player.socket, response);
+            luola::net::send(&mut player.socket, &response);
 
             return Some(player);
         }
@@ -48,7 +48,7 @@ fn handle_join(mut socket: TcpStream) -> Option<Player> {
             };
             let response = Message::JoinError(response);
 
-            luola::net::send(&mut socket, response);
+            luola::net::send(&mut socket, &response);
             return None;
         }
     }
@@ -83,6 +83,20 @@ fn wait_for_join(n_players: usize) -> Vec<Player> {
     players
 }
 
+fn send_game_state(layer: Layer, players: &mut Vec<Player>) {
+    let message = GameStateMsg { layer };
+    let message = Message::GameState(message);
+    for player in players {
+        luola::net::send(&mut player.socket, &message);
+    }
+}
+
+fn start_game(world: World, mut players: Vec<Player>) {
+    let layer = world.layers[0].clone();
+
+    send_game_state(layer, &mut players);
+}
+
 fn main() {
     let n_players: usize = 2;
     let worldgen_seed: u64 = 1;
@@ -93,4 +107,6 @@ fn main() {
 
     let players: Vec<Player> = wait_for_join(n_players);
     println!("{} players connected, ready to start", players.len());
+
+    start_game(world, players);
 }

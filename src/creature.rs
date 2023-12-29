@@ -4,10 +4,10 @@ use serde::{Deserialize, Serialize};
 
 pub mod creature_types;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub struct Statistics;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub struct Creature {
     pub name: String,
     pub stats: Statistics,

@@ -16,8 +16,8 @@ fn create_header(data: &Vec<u8>) -> Vec<u8> {
     header
 }
 
-pub fn send(stream: &mut TcpStream, msg: Message) {
-    let mut data: Vec<u8> = match bincode::serialize(&msg) {
+pub fn send(stream: &mut TcpStream, msg: &Message) {
+    let mut data: Vec<u8> = match bincode::serialize(msg) {
         Ok(buf) => buf,
         Err(e) => panic!("failed to serialize message: {:?}", e),
     };
