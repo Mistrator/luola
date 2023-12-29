@@ -1,3 +1,5 @@
+use crate::creature::Creature;
+use std::collections::HashMap;
 use std::fmt;
 
 #[derive(Clone)]
@@ -18,12 +20,20 @@ pub struct GridIntersection {
     pub x: i32,
 }
 
+pub trait Entity {
+    fn get_id(&self) -> u128;
+
+    fn get_position(&self) -> &GridSquare;
+    fn set_position(&mut self, pos: &GridSquare);
+}
+
 pub struct World {
     pub layers: Vec<Layer>,
 }
 
 pub struct Layer {
     grid: Vec<Vec<Tile>>,
+    creatures: HashMap<u128, Creature>,
 }
 
 impl Layer {
@@ -34,6 +44,7 @@ impl Layer {
 
         Self {
             grid: vec![vec![Tile::Empty; width as usize]; height as usize],
+            creatures: HashMap::new(),
         }
     }
 
@@ -62,6 +73,10 @@ impl Layer {
         }
         self.grid[square.y as usize][square.x as usize] = tile;
     }
+
+    pub fn add_creature(&mut self, creature: Creature) {
+        self.creatures.insert(creature.get_id(), creature);
+    }
 }
 
 impl fmt::Display for Layer {
@@ -76,7 +91,12 @@ impl fmt::Display for Layer {
                     _ => write!(f, "#"),
                 }?;
             }
-            println!("");
+            write!(f, "\n")?;
+        }
+
+        for (_, creature) in &self.creatures {
+            let pos = creature.get_position();
+            write!(f, "{} ({}, {})\n", creature.name, pos.y, pos.x)?;
         }
 
         Ok(())

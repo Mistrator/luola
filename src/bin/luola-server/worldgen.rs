@@ -1,4 +1,5 @@
 use luola::constants;
+use luola::creature::{creature_types, Creature};
 use luola::world::*;
 use rand::prelude::*;
 use rand_chacha::ChaCha20Rng;
@@ -15,6 +16,17 @@ pub fn generate_layer(layer_i: i32, rng: &mut ChaCha20Rng) -> Layer {
                 layer.set_tile(square, Tile::Wall);
             }
         }
+    }
+
+    for _ in 0..(5 * (layer_i + 1)) {
+        let mut creature: Creature = creature_types::create_testcreature();
+        let pos = GridSquare {
+            y: rng.gen_range(0..constants::WORLD_HEIGHT),
+            x: rng.gen_range(0..constants::WORLD_WIDTH),
+        };
+        creature.set_position(&pos);
+
+        layer.add_creature(creature);
     }
 
     layer
