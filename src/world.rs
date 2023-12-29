@@ -1,17 +1,24 @@
 use crate::creature::Creature;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize, Serialize)]
 pub enum Tile {
     Empty,
     Wall,
 }
 
-#[derive(Debug)]
+#[derive(Deserialize, Serialize)]
 pub struct GridSquare {
     pub y: i32,
     pub x: i32,
+}
+
+impl fmt::Display for GridSquare {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {})", self.y, self.x)
+    }
 }
 
 // Upper left corner of a grid square.
@@ -31,6 +38,7 @@ pub struct World {
     pub layers: Vec<Layer>,
 }
 
+#[derive(Deserialize, Serialize)]
 pub struct Layer {
     grid: Vec<Vec<Tile>>,
     creatures: HashMap<u128, Creature>,
@@ -69,7 +77,7 @@ impl Layer {
 
     pub fn set_tile(&mut self, square: GridSquare, tile: Tile) {
         if !self.valid_square(&square) {
-            panic!("out of bounds write to grid square {:?}", square);
+            panic!("out of bounds write to grid square {}", square);
         }
         self.grid[square.y as usize][square.x as usize] = tile;
     }

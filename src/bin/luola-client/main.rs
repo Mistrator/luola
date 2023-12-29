@@ -19,7 +19,7 @@ fn join(stream: &mut TcpStream) {
             println!("failed to join the game: {}", err.message);
         }
         other => {
-            println!("unexpected message type: {:?}", other);
+            println!("received unexpected message type: {}", other);
         }
     }
 }

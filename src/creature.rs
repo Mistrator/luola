@@ -1,10 +1,13 @@
 use crate::world::{Entity, GridSquare};
 use rand::prelude::*;
+use serde::{Deserialize, Serialize};
 
 pub mod creature_types;
 
+#[derive(Deserialize, Serialize)]
 pub struct Statistics;
 
+#[derive(Deserialize, Serialize)]
 pub struct Creature {
     pub name: String,
     pub stats: Statistics,

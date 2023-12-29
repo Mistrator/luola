@@ -39,12 +39,12 @@ fn handle_join(mut socket: TcpStream) -> Option<Player> {
         }
         other => {
             println!(
-                "received unexpected message type: expected Message::Join, got {:?}",
+                "received unexpected message type: expected Join, got {}",
                 other
             );
 
             let response = ErrorMsg {
-                message: String::from("unexpected message type"),
+                message: String::from(format!("unexpected message type: {}", other)),
             };
             let response = Message::JoinError(response);
 
