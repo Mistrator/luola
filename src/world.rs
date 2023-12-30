@@ -3,13 +3,13 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, PartialEq, Serialize)]
 pub enum Tile {
     Empty,
     Wall,
 }
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, PartialEq, Serialize)]
 pub struct GridSquare {
     pub y: i32,
     pub x: i32,
@@ -68,7 +68,25 @@ impl Layer {
         square.y >= 0 && square.y < self.height() && square.x >= 0 && square.x < self.width()
     }
 
-    pub fn get_tile(&self, square: GridSquare) -> Option<&Tile> {
+    pub fn free_square(&self, square: &GridSquare) -> bool {
+        if !self.valid_square(square) {
+            return false;
+        }
+
+        if *self.get_tile(square).unwrap() != Tile::Empty {
+            return false;
+        }
+
+        for (_, creature) in &self.creatures {
+            if creature.get_position() == square {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    pub fn get_tile(&self, square: &GridSquare) -> Option<&Tile> {
         if !self.valid_square(&square) {
             return None;
         }
@@ -92,7 +110,7 @@ impl fmt::Display for Layer {
         for i in 0..self.height() {
             for j in 0..self.width() {
                 let square = GridSquare { y: i, x: j };
-                let tile = self.get_tile(square).unwrap();
+                let tile = self.get_tile(&square).unwrap();
 
                 match tile {
                     Tile::Empty => write!(f, "."),

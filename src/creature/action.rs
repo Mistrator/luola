@@ -1,5 +1,5 @@
 use crate::creature::Creature;
-use crate::world::{GridSquare, Layer};
+use crate::world::{Entity, GridSquare, Layer};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
@@ -14,12 +14,42 @@ pub struct MoveAction {
 }
 
 pub fn is_valid(
-    _action: &Action,
+    action: &Action,
     _prev_actions: &Vec<Action>,
     _actor: &Creature,
-    _layer: &Layer,
+    layer: &Layer,
 ) -> Result<(), String> {
-    Ok(())
+    match action {
+        Action::Idle => Ok(()),
+        Action::Move(m) => {
+            if !layer.valid_square(&m.destination) {
+                return Err(String::from("move destination square is outside the grid"));
+            }
+
+            if !layer.free_square(&m.destination) {
+                return Err(String::from("move destination square is not empty"));
+            }
+
+            // todo: check that the destination is not too far away for the creature
+            // todo: check that there is an unobstructed path to the destination square
+
+            Ok(())
+        }
+    }
 }
 
-pub fn execute(_action: &Action, _actor_id: u128, _layer: &mut Layer) {}
+pub fn execute(action: &Action, actor_id: u128, layer: &mut Layer) {
+    let actor = layer
+        .creatures
+        .get_mut(&actor_id)
+        .expect("actor should be a valid creature");
+
+    match action {
+        Action::Idle => return,
+        Action::Move(m) => {
+            println!("position before move: {}", actor.get_position());
+            actor.set_position(&m.destination);
+            println!("position after move: {}", actor.get_position());
+        }
+    }
+}
