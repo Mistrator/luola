@@ -1,7 +1,24 @@
 use luola::constants;
+use luola::creature::action::Action;
 use luola::messages::*;
+use luola::player::Player;
 use luola::world::Layer;
 use std::net::TcpStream;
+
+fn act(player: &mut Player) {
+    let cur_action = Action::Idle;
+    let msg = Message::Act(cur_action);
+
+    println!("trying to act");
+    luola::net::send(&mut player.socket, &msg);
+
+    let response = luola::net::receive(&mut player.socket);
+    match response {
+        Message::ActionOk => println!("action ok"),
+        Message::ActionError(err) => println!("action rejected: {}", err.message),
+        other => println!("received unexpected message type: {}", other),
+    }
+}
 
 fn receive_game_state(stream: &mut TcpStream) {
     let msg = luola::net::receive(stream);
@@ -18,7 +35,7 @@ fn receive_game_state(stream: &mut TcpStream) {
     }
 }
 
-fn join(stream: &mut TcpStream) {
+fn join(stream: &mut TcpStream) -> u128 {
     let join_msg = Message::Join(JoinMsg {
         version: constants::get_version(),
         character_name: String::from("testcharacter"),
@@ -28,14 +45,19 @@ fn join(stream: &mut TcpStream) {
 
     let response = luola::net::receive(stream);
     match response {
-        Message::JoinOk => {
-            println!("successfully joined the game");
+        Message::JoinOk(ok_msg) => {
+            println!(
+                "successfully joined the game with player id {}",
+                ok_msg.player_id
+            );
+
+            return ok_msg.player_id;
         }
         Message::JoinError(err) => {
-            println!("failed to join the game: {}", err.message);
+            panic!("failed to join the game: {}", err.message);
         }
         other => {
-            println!("received unexpected message type: {}", other);
+            panic!("received unexpected message type: {}", other);
         }
     }
 }
@@ -52,6 +74,10 @@ fn open_stream() -> TcpStream {
 
 fn main() {
     let mut stream = open_stream();
-    join(&mut stream);
-    receive_game_state(&mut stream);
+    let player_id = join(&mut stream);
+
+    let mut player = Player::build_existing(stream, player_id);
+    receive_game_state(&mut player.socket);
+    act(&mut player);
+    act(&mut player);
 }

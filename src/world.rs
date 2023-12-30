@@ -40,8 +40,8 @@ pub struct World {
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct Layer {
+    pub creatures: HashMap<u128, Creature>,
     grid: Vec<Vec<Tile>>,
-    creatures: HashMap<u128, Creature>,
 }
 
 impl Layer {

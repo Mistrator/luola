@@ -1,3 +1,4 @@
+use crate::creature::action::Action;
 use crate::world::Layer;
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -18,18 +19,24 @@ impl Header {
 #[derive(Deserialize, Serialize)]
 pub enum Message {
     Join(JoinMsg),
-    JoinOk,
+    JoinOk(JoinOkMsg),
     JoinError(ErrorMsg),
     GameState(GameStateMsg),
+    Act(Action),
+    ActionOk,
+    ActionError(ErrorMsg),
 }
 
 impl fmt::Display for Message {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let variant = match self {
             Message::Join(_) => "Join",
-            Message::JoinOk => "JoinOk",
+            Message::JoinOk(_) => "JoinOk",
             Message::JoinError(_) => "JoinError",
             Message::GameState(_) => "GameState",
+            Message::Act(_) => "Act",
+            Message::ActionOk => "ActionOk",
+            Message::ActionError(_) => "ActionError",
         };
 
         write!(f, "{}", variant)
@@ -40,6 +47,11 @@ impl fmt::Display for Message {
 pub struct JoinMsg {
     pub version: String,
     pub character_name: String,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct JoinOkMsg {
+    pub player_id: u128,
 }
 
 #[derive(Deserialize, Serialize)]
