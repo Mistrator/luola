@@ -18,6 +18,8 @@ fn act(player: &mut Player) {
         Message::ActionError(err) => println!("action rejected: {}", err.message),
         other => println!("received unexpected message type: {}", other),
     }
+
+    receive_game_state(&mut player.socket);
 }
 
 fn receive_game_state(stream: &mut TcpStream) {
@@ -72,12 +74,18 @@ fn open_stream() -> TcpStream {
     stream
 }
 
+fn play(player: &mut Player) {
+    loop {
+        act(player);
+    }
+}
+
 fn main() {
     let mut stream = open_stream();
     let player_id = join(&mut stream);
 
     let mut player = Player::build_existing(stream, player_id);
     receive_game_state(&mut player.socket);
-    act(&mut player);
-    act(&mut player);
+
+    play(&mut player);
 }

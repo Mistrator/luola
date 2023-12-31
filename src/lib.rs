@@ -1,6 +1,8 @@
 pub mod ai;
 pub mod constants;
 pub mod creature;
+pub mod dice;
+pub mod initiative;
 pub mod messages;
 pub mod net;
 pub mod player;

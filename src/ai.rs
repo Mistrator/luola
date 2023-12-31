@@ -1,4 +1,4 @@
-use crate::creature::{action::Action, Creature};
+use crate::creature::{action::Action, perception::Awareness, Creature};
 use crate::world::Layer;
 use serde::{Deserialize, Serialize};
 
@@ -9,7 +9,12 @@ pub enum Behavior {
 }
 
 pub fn act(actor: &Creature, _layer: &Layer) -> Action {
-    match actor.get_behavior() {
+    let actor_behavior = match actor.perception.get_awareness() {
+        Awareness::Wander => actor.get_wander_behavior(),
+        Awareness::Combat => actor.get_combat_behavior(),
+    };
+
+    match actor_behavior {
         Behavior::PlayerControlled(_) => {
             panic!("AI can't control player-controlled characters");
         }
