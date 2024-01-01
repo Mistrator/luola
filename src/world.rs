@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 
+mod gridalgos;
+
 #[derive(Clone, Deserialize, PartialEq, Serialize)]
 pub enum Tile {
     Empty,
