@@ -1,4 +1,5 @@
-use crate::world::{Entity, GridSquare};
+use crate::grid::GridSquare;
+use crate::world::Entity;
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
 

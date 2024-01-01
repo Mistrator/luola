@@ -1,5 +1,6 @@
 use crate::creature::Creature;
-use crate::world::{Entity, GridSquare, Layer};
+use crate::grid::GridSquare;
+use crate::world::{Entity, Layer};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
@@ -22,11 +23,11 @@ pub fn is_valid(
     match action {
         Action::Idle => Ok(()),
         Action::Move(m) => {
-            if !layer.valid_square(&m.destination) {
+            if !layer.grid.valid_square(&m.destination) {
                 return Err(String::from("move destination square is outside the grid"));
             }
 
-            if !layer.free_square(&m.destination) {
+            if !layer.grid.free_square(&m.destination) {
                 return Err(String::from("move destination square is not empty"));
             }
 

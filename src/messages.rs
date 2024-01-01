@@ -1,6 +1,9 @@
 use crate::creature::action::Action;
+use crate::creature::Creature;
+use crate::grid::Grid;
 use crate::world::Layer;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::fmt;
 
 #[derive(Deserialize, Serialize)]
@@ -61,5 +64,15 @@ pub struct ErrorMsg {
 
 #[derive(Deserialize, Serialize)]
 pub struct GameStateMsg {
-    pub layer: Layer,
+    pub creatures: HashMap<u128, Creature>,
+    pub grid: Grid,
+}
+
+impl GameStateMsg {
+    pub fn new(layer: &Layer) -> Self {
+        Self {
+            creatures: layer.creatures.clone(),
+            grid: layer.grid.clone(),
+        }
+    }
 }

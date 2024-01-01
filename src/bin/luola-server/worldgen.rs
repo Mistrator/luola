@@ -1,19 +1,21 @@
+use luola::ai::AI;
 use luola::constants;
 use luola::creature::{creature_types, Creature};
-use luola::world::*;
+use luola::grid::{GridSquare, Tile};
+use luola::world::{Entity, Layer, World};
 use rand::prelude::*;
 use rand_chacha::ChaCha20Rng;
 
 pub fn generate_layer(layer_i: i32, rng: &mut ChaCha20Rng) -> Layer {
     let mut layer = Layer::new(constants::WORLD_HEIGHT, constants::WORLD_WIDTH);
 
-    for i in 0..layer.height() {
-        for j in 0..layer.width() {
+    for i in 0..layer.grid.height() {
+        for j in 0..layer.grid.width() {
             let is_wall: bool = rng.gen_range(0..10) <= layer_i;
 
             if is_wall {
                 let square = GridSquare { y: i, x: j };
-                layer.set_tile(square, Tile::Wall);
+                layer.grid.set_tile(square, Tile::Wall);
             }
         }
     }
@@ -26,7 +28,9 @@ pub fn generate_layer(layer_i: i32, rng: &mut ChaCha20Rng) -> Layer {
         };
         creature.set_position(&pos);
 
-        layer.add_creature(creature);
+        let c_ai: AI = AI::new(creature.get_id());
+
+        layer.add_creature(creature, c_ai);
     }
 
     layer

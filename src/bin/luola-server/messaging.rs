@@ -86,8 +86,8 @@ pub fn wait_for_join(n_players: usize) -> HashMap<u128, Player> {
     players
 }
 
-pub fn send_game_state(layer: Layer, players: &mut HashMap<u128, Player>) {
-    let message = GameStateMsg { layer };
+pub fn send_game_state(layer: &Layer, players: &mut HashMap<u128, Player>) {
+    let message = GameStateMsg::new(layer);
     let message = Message::GameState(message);
     for (_, player) in players {
         luola::net::send(&mut player.socket, &message);

@@ -1,4 +1,4 @@
-use crate::world::GridSquare;
+use crate::grid::GridSquare;
 use std::cmp;
 
 // Horizontal and vertical steps cost 1 unit each.

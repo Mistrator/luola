@@ -1,34 +1,8 @@
 use crate::ai::AI;
 use crate::creature::Creature;
-use serde::{Deserialize, Serialize};
+use crate::grid::{Grid, GridSquare};
 use std::collections::HashMap;
 use std::fmt;
-
-pub mod gridalgos;
-
-#[derive(Clone, Deserialize, PartialEq, Serialize)]
-pub enum Tile {
-    Empty,
-    Wall,
-}
-
-#[derive(Clone, Copy, Deserialize, PartialEq, Serialize)]
-pub struct GridSquare {
-    pub y: i32,
-    pub x: i32,
-}
-
-impl fmt::Display for GridSquare {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({}, {})", self.y, self.x)
-    }
-}
-
-// Upper left corner of a grid square.
-pub struct GridIntersection {
-    pub y: i32,
-    pub x: i32,
-}
 
 pub trait Entity {
     fn get_id(&self) -> u128;
@@ -39,32 +13,18 @@ pub trait Entity {
 
 pub struct World {
     pub layers: Vec<Layer>,
-
-    // AI state is not stored in the layers because we don't want to
-    // send it to the clients.
-    pub creature_ai: HashMap<u128, AI>,
 }
 
 impl World {
     pub fn new() -> Self {
-        Self {
-            layers: Vec::new(),
-            creature_ai: HashMap::new(),
-        }
-    }
-
-    pub fn add_creature(&mut self, creature: Creature, c_ai: AI, layer_i: usize) {
-        let id = creature.get_id();
-
-        self.layers[layer_i].creatures.insert(id, creature);
-        self.creature_ai.insert(id, c_ai);
+        Self { layers: Vec::new() }
     }
 }
 
-#[derive(Clone, Deserialize, Serialize)]
 pub struct Layer {
     pub creatures: HashMap<u128, Creature>,
-    grid: Vec<Vec<Tile>>,
+    pub creature_ai: HashMap<u128, AI>,
+    pub grid: Grid,
 }
 
 impl Layer {
@@ -74,70 +34,31 @@ impl Layer {
         }
 
         Self {
-            grid: vec![vec![Tile::Empty; width as usize]; height as usize],
+            grid: Grid::new(height, width),
             creatures: HashMap::new(),
+            creature_ai: HashMap::new(),
         }
     }
 
-    pub fn height(&self) -> i32 {
-        self.grid.len() as i32
+    pub fn reconstruct(grid: Grid, creatures: HashMap<u128, Creature>) -> Self {
+        Self {
+            grid: grid,
+            creatures: creatures,
+            creature_ai: HashMap::new(),
+        }
     }
 
-    pub fn width(&self) -> i32 {
-        self.grid[0].len() as i32
-    }
+    pub fn add_creature(&mut self, creature: Creature, c_ai: AI) {
+        let id = creature.get_id();
 
-    pub fn valid_square(&self, square: &GridSquare) -> bool {
-        square.y >= 0 && square.y < self.height() && square.x >= 0 && square.x < self.width()
-    }
-
-    pub fn free_square(&self, square: &GridSquare) -> bool {
-        if !self.valid_square(square) {
-            return false;
-        }
-
-        if *self.get_tile(square).unwrap() != Tile::Empty {
-            return false;
-        }
-
-        for (_, creature) in &self.creatures {
-            if creature.get_position() == *square {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    pub fn get_tile(&self, square: &GridSquare) -> Option<&Tile> {
-        if !self.valid_square(&square) {
-            return None;
-        }
-        Some(&self.grid[square.y as usize][square.x as usize])
-    }
-
-    pub fn set_tile(&mut self, square: GridSquare, tile: Tile) {
-        if !self.valid_square(&square) {
-            panic!("out of bounds write to grid square {}", square);
-        }
-        self.grid[square.y as usize][square.x as usize] = tile;
+        self.creatures.insert(id, creature);
+        self.creature_ai.insert(id, c_ai);
     }
 }
 
 impl fmt::Display for Layer {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for i in 0..self.height() {
-            for j in 0..self.width() {
-                let square = GridSquare { y: i, x: j };
-                let tile = self.get_tile(&square).unwrap();
-
-                match tile {
-                    Tile::Empty => write!(f, "."),
-                    _ => write!(f, "#"),
-                }?;
-            }
-            write!(f, "\n")?;
-        }
+        write!(f, "{}", self.grid)?;
 
         for (_, creature) in &self.creatures {
             let pos = creature.get_position();

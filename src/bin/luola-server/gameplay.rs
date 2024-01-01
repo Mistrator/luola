@@ -1,5 +1,5 @@
 use crate::messaging;
-use luola::ai::{self, AI};
+use luola::ai;
 use luola::creature::action::{self, Action};
 use luola::creature::perception::{Awareness, Perception};
 use luola::initiative::Initiative;
@@ -19,7 +19,6 @@ enum GameplayMode {
 fn take_creature_turn(
     creature_id: u128,
     layer: &mut Layer,
-    creature_ai: &mut HashMap<u128, AI>,
     players: &mut HashMap<u128, Player>,
     gameplay_mode: GameplayMode,
     current_round: i64,
@@ -31,7 +30,7 @@ fn take_creature_turn(
 
     while prev_actions.len() < creature_max_actions {
         let creature = layer.creatures.get(&creature_id).unwrap();
-        let c_ai = creature_ai.get(&creature_id).unwrap();
+        let c_ai = layer.creature_ai.get(&creature_id).unwrap();
         let cur_action: Action = match c_ai.get_controlling_player_id() {
             Some(player_id) => {
                 let mut player = players
@@ -52,13 +51,17 @@ fn take_creature_turn(
         action::execute(&cur_action, creature_id, layer);
         prev_actions.push(cur_action);
 
-        Perception::update_all_observations(creature_ai, layer, current_round);
+        Perception::update_all_observations(
+            &mut layer.creature_ai,
+            &layer.grid,
+            &layer.creatures,
+            current_round,
+        );
 
-        let layer_tx = (*layer).clone();
-        messaging::send_game_state(layer_tx, players);
+        messaging::send_game_state(layer, players);
 
         // Re-borrow as immutable to satisfy the borrow checker
-        let c_ai = creature_ai.get(&creature_id).unwrap();
+        let c_ai = layer.creature_ai.get(&creature_id).unwrap();
 
         // In exploration mode, if a player acts and any creature is alerted,
         // immediately end the turn. However, if a non-player creature
@@ -66,7 +69,7 @@ fn take_creature_turn(
         if gameplay_mode == GameplayMode::Exploration {
             if c_ai.is_player_controlled() {
                 for (id, _) in &layer.creatures {
-                    let other_ai = creature_ai.get(&id).unwrap();
+                    let other_ai = layer.creature_ai.get(&id).unwrap();
                     if !other_ai.is_player_controlled()
                         && other_ai.perception.get_awareness() == Awareness::Combat
                     {
@@ -84,7 +87,7 @@ fn take_creature_turn(
     }
 
     for (id, _) in &layer.creatures {
-        let other_ai = creature_ai.get(&id).unwrap();
+        let other_ai = layer.creature_ai.get(&id).unwrap();
         if !other_ai.is_player_controlled()
             && other_ai.perception.get_awareness() == Awareness::Combat
         {
@@ -99,17 +102,17 @@ fn take_creature_turn(
 
 fn run_exploration_round(
     layer: &mut Layer,
-    creature_ai: &mut HashMap<u128, AI>,
     players: &mut HashMap<u128, Player>,
     init: &Initiative,
     current_round: i64,
 ) -> GameplayMode {
-    let aware = init.get_aware(creature_ai);
-    let wandering = init.get_wandering(creature_ai);
+    let aware = init.get_aware(&layer.creature_ai);
+    let wandering = init.get_wandering(&layer.creature_ai);
 
     for (_, creature_id) in aware {
         assert!(
-            creature_ai
+            layer
+                .creature_ai
                 .get(&creature_id)
                 .unwrap()
                 .is_player_controlled(),
@@ -122,7 +125,6 @@ fn run_exploration_round(
         let someone_alerted = take_creature_turn(
             creature_id,
             layer,
-            creature_ai,
             players,
             GameplayMode::Exploration,
             current_round,
@@ -143,7 +145,6 @@ fn run_exploration_round(
         let someone_alerted = take_creature_turn(
             creature_id,
             layer,
-            creature_ai,
             players,
             GameplayMode::Exploration,
             current_round,
@@ -163,19 +164,17 @@ fn run_exploration_round(
 
 fn run_combat_round(
     layer: &mut Layer,
-    creature_ai: &mut HashMap<u128, AI>,
     players: &mut HashMap<u128, Player>,
     init: &Initiative,
     current_round: i64,
 ) -> GameplayMode {
-    let aware = init.get_aware(creature_ai);
-    let wandering = init.get_wandering(creature_ai);
+    let aware = init.get_aware(&layer.creature_ai);
+    let wandering = init.get_wandering(&layer.creature_ai);
 
     for (_, creature_id) in aware {
         let someone_alerted = take_creature_turn(
             creature_id,
             layer,
-            creature_ai,
             players,
             GameplayMode::Combat,
             current_round,
@@ -191,7 +190,6 @@ fn run_combat_round(
         let someone_alerted = take_creature_turn(
             creature_id,
             layer,
-            creature_ai,
             players,
             GameplayMode::Combat,
             current_round,
@@ -212,8 +210,7 @@ pub fn run_game(mut world: World, mut players: HashMap<u128, Player>) {
 
     let mut current_round: i64 = 0;
 
-    let layer_tx = world.layers[current_layer].clone();
-    messaging::send_game_state(layer_tx, &mut players);
+    messaging::send_game_state(&world.layers[current_layer], &mut players);
 
     loop {
         if next_mode != current_mode {
@@ -237,7 +234,6 @@ pub fn run_game(mut world: World, mut players: HashMap<u128, Player>) {
                 println!("start exploration round");
                 next_mode = run_exploration_round(
                     &mut world.layers[current_layer],
-                    &mut world.creature_ai,
                     &mut players,
                     &init,
                     current_round,
@@ -247,7 +243,6 @@ pub fn run_game(mut world: World, mut players: HashMap<u128, Player>) {
                 println!("start combat round");
                 next_mode = run_combat_round(
                     &mut world.layers[current_layer],
-                    &mut world.creature_ai,
                     &mut players,
                     &init,
                     current_round,

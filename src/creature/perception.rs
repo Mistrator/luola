@@ -1,5 +1,7 @@
 use crate::ai::AI;
-use crate::world::{gridalgos, Entity, GridSquare, Layer};
+use crate::creature::Creature;
+use crate::grid::{gridalgos, Grid, GridSquare};
+use crate::world::Entity;
 use std::collections::HashMap;
 
 #[derive(PartialEq)]
@@ -8,6 +10,7 @@ pub enum Awareness {
     Combat,
 }
 
+#[allow(dead_code)]
 pub struct Observation {
     creature_id: u128,
     position: GridSquare,
@@ -28,32 +31,16 @@ impl Perception {
         }
     }
 
-    pub fn update_observations(&mut self, layer: &Layer, cur_round: i64) {
-        let obs_max_lifetime_rounds = 3;
-        self.observations
-            .retain(|x| cur_round - x.round <= obs_max_lifetime_rounds);
-
-        let mut new_obs = self.seek(layer, cur_round);
-        self.observations.append(&mut new_obs);
-        // todo: notify nearby creatures of the observation
-    }
-
-    pub fn update_all_observations(
-        creature_ai: &mut HashMap<u128, AI>,
-        layer: &Layer,
+    pub fn seek(
+        &self,
+        _grid: &Grid,
+        creatures: &HashMap<u128, Creature>,
         cur_round: i64,
-    ) {
-        for (id, _) in &layer.creatures {
-            let c_ai = creature_ai.get_mut(&id).unwrap();
-            c_ai.perception.update_observations(layer, cur_round);
-        }
-    }
-
-    pub fn seek(&self, layer: &Layer, cur_round: i64) -> Vec<Observation> {
+    ) -> Vec<Observation> {
         let mut observations: Vec<Observation> = Vec::new();
-        let owner_pos = layer.creatures.get(&self.owner_id).unwrap().get_position();
+        let owner_pos = creatures.get(&self.owner_id).unwrap().get_position();
 
-        for (id, creature) in &layer.creatures {
+        for (id, creature) in creatures {
             let pos: GridSquare = creature.get_position();
 
             // todo: get sense properties from creature stats
@@ -75,6 +62,33 @@ impl Perception {
         }
 
         observations
+    }
+
+    pub fn update_observations(
+        &mut self,
+        grid: &Grid,
+        creatures: &HashMap<u128, Creature>,
+        cur_round: i64,
+    ) {
+        let obs_max_lifetime_rounds = 3;
+        self.observations
+            .retain(|x| cur_round - x.round <= obs_max_lifetime_rounds);
+
+        let mut new_obs = self.seek(grid, creatures, cur_round);
+        self.observations.append(&mut new_obs);
+        // todo: notify nearby creatures of the observation
+    }
+
+    pub fn update_all_observations(
+        creature_ai: &mut HashMap<u128, AI>,
+        grid: &Grid,
+        creatures: &HashMap<u128, Creature>,
+        cur_round: i64,
+    ) {
+        for (_, c_ai) in creature_ai {
+            c_ai.perception
+                .update_observations(grid, creatures, cur_round);
+        }
     }
 
     pub fn get_friendly_observations(&self) -> Vec<Observation> {

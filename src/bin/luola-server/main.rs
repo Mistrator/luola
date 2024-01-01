@@ -28,7 +28,7 @@ fn main() {
             break 'outer;
         }
     }
-    world
+    world.layers[0]
         .creature_ai
         .get_mut(&creature_id)
         .unwrap()
