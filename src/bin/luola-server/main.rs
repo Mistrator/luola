@@ -28,8 +28,8 @@ fn main() {
             break 'outer;
         }
     }
-    world.layers[0]
-        .creatures
+    world
+        .creature_ai
         .get_mut(&creature_id)
         .unwrap()
         .set_override_behavior(Behavior::PlayerControlled(player_id));

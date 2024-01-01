@@ -1,8 +1,10 @@
+use crate::ai::AI;
 use crate::creature::perception::Awareness;
 use crate::dice;
 use crate::world::Layer;
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Deserialize, PartialEq, Serialize)]
 pub struct Initiative {
@@ -68,18 +70,15 @@ impl Initiative {
         self.order.retain(|x| x.1 != creature_id);
     }
 
-    pub fn get_aware(&self, layer: &Layer) -> Vec<(i32, u128)> {
+    pub fn get_aware(&self, creature_ai: &HashMap<u128, AI>) -> Vec<(i32, u128)> {
         let mut aware: Vec<(i32, u128)> = Vec::new();
 
         for (init, id) in &self.order {
-            let creature = layer
-                .creatures
+            let c_ai = creature_ai
                 .get(&id)
                 .expect("initiative should not contain nonexistent creatures");
 
-            if creature.is_player_controlled()
-                || creature.perception.get_awareness() == Awareness::Combat
-            {
+            if c_ai.is_player_controlled() || c_ai.perception.get_awareness() == Awareness::Combat {
                 aware.push((*init, *id));
             }
         }
@@ -87,17 +86,15 @@ impl Initiative {
         aware
     }
 
-    pub fn get_wandering(&self, layer: &Layer) -> Vec<(i32, u128)> {
+    pub fn get_wandering(&self, creature_ai: &HashMap<u128, AI>) -> Vec<(i32, u128)> {
         let mut wander: Vec<(i32, u128)> = Vec::new();
 
         for (init, id) in &self.order {
-            let creature = layer
-                .creatures
+            let c_ai = creature_ai
                 .get(&id)
                 .expect("initiative should not contain nonexistent creatures");
 
-            if !creature.is_player_controlled()
-                && creature.perception.get_awareness() == Awareness::Wander
+            if !c_ai.is_player_controlled() && c_ai.perception.get_awareness() == Awareness::Wander
             {
                 wander.push((*init, *id));
             }

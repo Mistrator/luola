@@ -1,13 +1,13 @@
-use crate::world::{GridSquare, Layer};
-use serde::{Deserialize, Serialize};
+use crate::ai::AI;
+use crate::world::{gridalgos, Entity, GridSquare, Layer};
+use std::collections::HashMap;
 
-#[derive(Clone, PartialEq, Deserialize, Serialize)]
+#[derive(PartialEq)]
 pub enum Awareness {
     Wander,
     Combat,
 }
 
-#[derive(Clone, Deserialize, Serialize)]
 pub struct Observation {
     creature_id: u128,
     position: GridSquare,
@@ -15,7 +15,6 @@ pub struct Observation {
     direct: bool,
 }
 
-#[derive(Clone, Deserialize, Serialize)]
 pub struct Perception {
     observations: Vec<Observation>,
     owner_id: u128,
@@ -29,21 +28,52 @@ impl Perception {
         }
     }
 
-    pub fn update_observations(&mut self, _cur_round: i64) {
-        // todo: drop observations that are too old
-        //       - this may cause a creature in combat to become wandering again
-        // todo: seek environment and make new observations
-        // todo: inform nearby creatures as well
+    pub fn update_observations(&mut self, layer: &Layer, cur_round: i64) {
+        let obs_max_lifetime_rounds = 3;
+        self.observations
+            .retain(|x| cur_round - x.round <= obs_max_lifetime_rounds);
+
+        let mut new_obs = self.seek(layer, cur_round);
+        self.observations.append(&mut new_obs);
+        // todo: notify nearby creatures of the observation
     }
 
-    pub fn update_observations_globally(layer: &mut Layer, cur_round: i64) {
-        for (_, creature) in &mut layer.creatures {
-            creature.perception.update_observations(cur_round);
+    pub fn update_all_observations(
+        creature_ai: &mut HashMap<u128, AI>,
+        layer: &Layer,
+        cur_round: i64,
+    ) {
+        for (id, _) in &layer.creatures {
+            let c_ai = creature_ai.get_mut(&id).unwrap();
+            c_ai.perception.update_observations(layer, cur_round);
         }
     }
 
-    pub fn seek(_layer: &Layer) -> Vec<Observation> {
-        let observations: Vec<Observation> = Vec::new();
+    pub fn seek(&self, layer: &Layer, cur_round: i64) -> Vec<Observation> {
+        let mut observations: Vec<Observation> = Vec::new();
+        let owner_pos = layer.creatures.get(&self.owner_id).unwrap().get_position();
+
+        for (id, creature) in &layer.creatures {
+            let pos: GridSquare = creature.get_position();
+
+            // todo: get sense properties from creature stats
+            // todo: make obstacles block senses
+            let sensing_distance = 5;
+            if gridalgos::distance(&owner_pos, &pos) <= sensing_distance {
+                println!(
+                    "creature {} noticed creature {} while seeking",
+                    self.owner_id, *id
+                );
+                let obs = Observation {
+                    creature_id: *id,
+                    position: pos,
+                    round: cur_round,
+                    direct: true,
+                };
+                observations.push(obs);
+            }
+        }
+
         observations
     }
 

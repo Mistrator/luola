@@ -1,9 +1,10 @@
+use crate::ai::AI;
 use crate::creature::Creature;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 
-mod gridalgos;
+pub mod gridalgos;
 
 #[derive(Clone, Deserialize, PartialEq, Serialize)]
 pub enum Tile {
@@ -11,7 +12,7 @@ pub enum Tile {
     Wall,
 }
 
-#[derive(Clone, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Deserialize, PartialEq, Serialize)]
 pub struct GridSquare {
     pub y: i32,
     pub x: i32,
@@ -32,12 +33,32 @@ pub struct GridIntersection {
 pub trait Entity {
     fn get_id(&self) -> u128;
 
-    fn get_position(&self) -> &GridSquare;
+    fn get_position(&self) -> GridSquare;
     fn set_position(&mut self, pos: &GridSquare);
 }
 
 pub struct World {
     pub layers: Vec<Layer>,
+
+    // AI state is not stored in the layers because we don't want to
+    // send it to the clients.
+    pub creature_ai: HashMap<u128, AI>,
+}
+
+impl World {
+    pub fn new() -> Self {
+        Self {
+            layers: Vec::new(),
+            creature_ai: HashMap::new(),
+        }
+    }
+
+    pub fn add_creature(&mut self, creature: Creature, c_ai: AI, layer_i: usize) {
+        let id = creature.get_id();
+
+        self.layers[layer_i].creatures.insert(id, creature);
+        self.creature_ai.insert(id, c_ai);
+    }
 }
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -80,7 +101,7 @@ impl Layer {
         }
 
         for (_, creature) in &self.creatures {
-            if creature.get_position() == square {
+            if creature.get_position() == *square {
                 return false;
             }
         }
@@ -100,10 +121,6 @@ impl Layer {
             panic!("out of bounds write to grid square {}", square);
         }
         self.grid[square.y as usize][square.x as usize] = tile;
-    }
-
-    pub fn add_creature(&mut self, creature: Creature) {
-        self.creatures.insert(creature.get_id(), creature);
     }
 }
 

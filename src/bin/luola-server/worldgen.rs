@@ -35,7 +35,7 @@ pub fn generate_layer(layer_i: i32, rng: &mut ChaCha20Rng) -> Layer {
 pub fn generate_world(rng_seed: u64) -> World {
     let mut rng = ChaCha20Rng::seed_from_u64(rng_seed);
 
-    let mut world = World { layers: Vec::new() };
+    let mut world = World::new();
 
     for i in 0..constants::WORLD_LAYERS {
         let layer = generate_layer(i, &mut rng);

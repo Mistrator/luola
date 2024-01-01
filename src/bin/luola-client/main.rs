@@ -4,6 +4,7 @@ use luola::messages::*;
 use luola::player::Player;
 use luola::world::Layer;
 use std::net::TcpStream;
+use std::{thread, time};
 
 fn act(player: &mut Player) {
     let cur_action = Action::Idle;
@@ -76,7 +77,18 @@ fn open_stream() -> TcpStream {
 
 fn play(player: &mut Player) {
     loop {
+        let delay = time::Duration::from_millis(1000);
+
+        thread::sleep(delay);
         act(player);
+
+        thread::sleep(delay);
+        act(player);
+
+        for _ in 0..4 {
+            receive_game_state(&mut player.socket);
+            receive_game_state(&mut player.socket);
+        }
     }
 }
 

@@ -1,5 +1,5 @@
 use crate::messaging;
-use luola::ai;
+use luola::ai::{self, AI};
 use luola::creature::action::{self, Action};
 use luola::creature::perception::{Awareness, Perception};
 use luola::initiative::Initiative;
@@ -19,6 +19,7 @@ enum GameplayMode {
 fn take_creature_turn(
     creature_id: u128,
     layer: &mut Layer,
+    creature_ai: &mut HashMap<u128, AI>,
     players: &mut HashMap<u128, Player>,
     gameplay_mode: GameplayMode,
     current_round: i64,
@@ -30,7 +31,8 @@ fn take_creature_turn(
 
     while prev_actions.len() < creature_max_actions {
         let creature = layer.creatures.get(&creature_id).unwrap();
-        let cur_action: Action = match creature.get_controlling_player_id() {
+        let c_ai = creature_ai.get(&creature_id).unwrap();
+        let cur_action: Action = match c_ai.get_controlling_player_id() {
             Some(player_id) => {
                 let mut player = players
                     .get_mut(&player_id)
@@ -38,7 +40,7 @@ fn take_creature_turn(
                 messaging::get_player_action(&mut player, &prev_actions, creature, layer)
             }
             None => {
-                let ai_action = ai::act(creature, layer);
+                let ai_action = ai::act(c_ai, layer);
                 action::is_valid(&ai_action, &prev_actions, creature, layer)
                     .expect("AI should not take an invalid action");
                 ai_action
@@ -50,29 +52,30 @@ fn take_creature_turn(
         action::execute(&cur_action, creature_id, layer);
         prev_actions.push(cur_action);
 
-        Perception::update_observations_globally(layer, current_round);
+        Perception::update_all_observations(creature_ai, layer, current_round);
 
         let layer_tx = (*layer).clone();
         messaging::send_game_state(layer_tx, players);
 
         // Re-borrow as immutable to satisfy the borrow checker
-        let creature = layer.creatures.get(&creature_id).unwrap();
+        let c_ai = creature_ai.get(&creature_id).unwrap();
 
         // In exploration mode, if a player acts and any creature is alerted,
         // immediately end the turn. However, if a non-player creature
         // acts, only end the turn if the creature itself is alerted.
         if gameplay_mode == GameplayMode::Exploration {
-            if creature.is_player_controlled() {
-                for (_, c) in &layer.creatures {
-                    if !c.is_player_controlled()
-                        && c.perception.get_awareness() == Awareness::Combat
+            if c_ai.is_player_controlled() {
+                for (id, _) in &layer.creatures {
+                    let other_ai = creature_ai.get(&id).unwrap();
+                    if !other_ai.is_player_controlled()
+                        && other_ai.perception.get_awareness() == Awareness::Combat
                     {
                         // A player alerted some non-player creature.
                         return true;
                     }
                 }
             } else {
-                if creature.perception.get_awareness() == Awareness::Combat {
+                if c_ai.perception.get_awareness() == Awareness::Combat {
                     // This non-player creature got alerted.
                     return true;
                 }
@@ -80,8 +83,11 @@ fn take_creature_turn(
         }
     }
 
-    for (_, c) in &layer.creatures {
-        if !c.is_player_controlled() && c.perception.get_awareness() == Awareness::Combat {
+    for (id, _) in &layer.creatures {
+        let other_ai = creature_ai.get(&id).unwrap();
+        if !other_ai.is_player_controlled()
+            && other_ai.perception.get_awareness() == Awareness::Combat
+        {
             // Some non-player creature is alerted at the moment.
             return true;
         }
@@ -93,17 +99,17 @@ fn take_creature_turn(
 
 fn run_exploration_round(
     layer: &mut Layer,
+    creature_ai: &mut HashMap<u128, AI>,
     players: &mut HashMap<u128, Player>,
     init: &Initiative,
     current_round: i64,
 ) -> GameplayMode {
-    let aware = init.get_aware(layer);
-    let wandering = init.get_wandering(layer);
+    let aware = init.get_aware(creature_ai);
+    let wandering = init.get_wandering(creature_ai);
 
     for (_, creature_id) in aware {
         assert!(
-            layer
-                .creatures
+            creature_ai
                 .get(&creature_id)
                 .unwrap()
                 .is_player_controlled(),
@@ -116,6 +122,7 @@ fn run_exploration_round(
         let someone_alerted = take_creature_turn(
             creature_id,
             layer,
+            creature_ai,
             players,
             GameplayMode::Exploration,
             current_round,
@@ -136,6 +143,7 @@ fn run_exploration_round(
         let someone_alerted = take_creature_turn(
             creature_id,
             layer,
+            creature_ai,
             players,
             GameplayMode::Exploration,
             current_round,
@@ -155,17 +163,19 @@ fn run_exploration_round(
 
 fn run_combat_round(
     layer: &mut Layer,
+    creature_ai: &mut HashMap<u128, AI>,
     players: &mut HashMap<u128, Player>,
     init: &Initiative,
     current_round: i64,
 ) -> GameplayMode {
-    let aware = init.get_aware(layer);
-    let wandering = init.get_wandering(layer);
+    let aware = init.get_aware(creature_ai);
+    let wandering = init.get_wandering(creature_ai);
 
     for (_, creature_id) in aware {
         let someone_alerted = take_creature_turn(
             creature_id,
             layer,
+            creature_ai,
             players,
             GameplayMode::Combat,
             current_round,
@@ -181,6 +191,7 @@ fn run_combat_round(
         let someone_alerted = take_creature_turn(
             creature_id,
             layer,
+            creature_ai,
             players,
             GameplayMode::Combat,
             current_round,
@@ -226,6 +237,7 @@ pub fn run_game(mut world: World, mut players: HashMap<u128, Player>) {
                 println!("start exploration round");
                 next_mode = run_exploration_round(
                     &mut world.layers[current_layer],
+                    &mut world.creature_ai,
                     &mut players,
                     &init,
                     current_round,
@@ -235,6 +247,7 @@ pub fn run_game(mut world: World, mut players: HashMap<u128, Player>) {
                 println!("start combat round");
                 next_mode = run_combat_round(
                     &mut world.layers[current_layer],
+                    &mut world.creature_ai,
                     &mut players,
                     &init,
                     current_round,
