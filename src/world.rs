@@ -63,6 +63,7 @@ impl fmt::Display for Layer {
         for (_, creature) in &self.creatures {
             let pos = creature.get_position();
             write!(f, "{} ({}, {})\n", creature.name, pos.y, pos.x)?;
+            write!(f, "{}", creature.stats)?;
         }
 
         Ok(())

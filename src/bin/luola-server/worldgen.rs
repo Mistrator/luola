@@ -20,13 +20,12 @@ pub fn generate_layer(layer_i: i32, rng: &mut ChaCha20Rng) -> Layer {
         }
     }
 
-    for _ in 0..(5 * (layer_i + 1)) {
-        let mut creature: Creature = creature_types::create_testcreature();
+    for i in 0..(5 * (layer_i + 1)) {
         let pos = GridSquare {
             y: rng.gen_range(0..constants::WORLD_HEIGHT),
             x: rng.gen_range(0..constants::WORLD_WIDTH),
         };
-        creature.set_position(&pos);
+        let creature: Creature = creature_types::create_testcreature(5 * i, pos);
 
         let c_ai: AI = AI::new(creature.get_id());
 

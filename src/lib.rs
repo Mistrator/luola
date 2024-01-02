@@ -7,4 +7,5 @@ pub mod initiative;
 pub mod messages;
 pub mod net;
 pub mod player;
+pub mod stat;
 pub mod world;

@@ -1,3 +1,4 @@
+use crate::creature::statistics::Statistics;
 use crate::grid::GridSquare;
 use crate::world::Entity;
 use rand::prelude::*;
@@ -6,9 +7,7 @@ use serde::{Deserialize, Serialize};
 pub mod action;
 pub mod creature_types;
 pub mod perception;
-
-#[derive(Clone, Deserialize, Serialize)]
-pub struct Statistics;
+pub mod statistics;
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct Creature {
@@ -20,15 +19,15 @@ pub struct Creature {
 }
 
 impl Creature {
-    pub fn new(name: String) -> Self {
+    pub fn new(name: String, position: GridSquare, stats: Statistics) -> Self {
         let mut rng = rand::thread_rng();
         let id = rng.gen();
 
         Self {
             id: id,
             name: name,
-            position: GridSquare { y: 0, x: 0 },
-            stats: Statistics {},
+            position: position,
+            stats: stats,
         }
     }
 
