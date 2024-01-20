@@ -1,7 +1,6 @@
 use crate::ai::AI;
 use crate::creature::Creature;
 use crate::grid::{gridalgos, Grid, GridSquare};
-use crate::world::Entity;
 use std::collections::HashMap;
 
 #[derive(PartialEq)]

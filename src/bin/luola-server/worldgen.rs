@@ -2,7 +2,10 @@ use luola::ai::AI;
 use luola::constants;
 use luola::creature::{creature_types, Creature};
 use luola::grid::{GridSquare, Tile};
-use luola::world::{Entity, Layer, World};
+use luola::item::effect::Effect;
+use luola::item::statistics::Rarity;
+use luola::item::{item_types, Item};
+use luola::world::{Layer, World};
 use rand::prelude::*;
 use rand_chacha::ChaCha20Rng;
 
@@ -25,11 +28,14 @@ pub fn generate_layer(layer_i: i32, rng: &mut ChaCha20Rng) -> Layer {
             y: rng.gen_range(0..constants::WORLD_HEIGHT),
             x: rng.gen_range(0..constants::WORLD_WIDTH),
         };
-        let creature: Creature = creature_types::create_testcreature(5 * i, pos);
-
+        let mut creature: Creature = creature_types::create_testcreature(5 * i, pos);
         let c_ai: AI = AI::new(creature.get_id());
 
+        let item: (Item, Effect) = item_types::create_testitem(5 * i, Rarity::Common);
+        creature.inventory.active_items.push(item.0.get_id());
+
         layer.add_creature(creature, c_ai);
+        layer.add_item(item.0, item.1);
     }
 
     layer

@@ -4,6 +4,7 @@ pub mod creature;
 pub mod dice;
 pub mod grid;
 pub mod initiative;
+pub mod item;
 pub mod messages;
 pub mod net;
 pub mod player;

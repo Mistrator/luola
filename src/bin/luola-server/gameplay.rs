@@ -4,7 +4,7 @@ use luola::creature::action::{self, Action};
 use luola::creature::perception::{Awareness, Perception};
 use luola::initiative::Initiative;
 use luola::player::Player;
-use luola::world::{Entity, Layer, World};
+use luola::world::{Layer, World};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

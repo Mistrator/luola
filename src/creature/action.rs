@@ -1,17 +1,25 @@
 use crate::creature::Creature;
 use crate::grid::GridSquare;
-use crate::world::{Entity, Layer};
+use crate::item::targeting::Target;
+use crate::world::Layer;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
 pub enum Action {
     Idle,
     Move(MoveAction),
+    UseItem(UseItemAction),
 }
 
 #[derive(Deserialize, Serialize)]
 pub struct MoveAction {
     pub destination: GridSquare,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct UseItemAction {
+    pub inventory_slot: i32,
+    pub target: Target,
 }
 
 pub fn is_valid(
@@ -36,6 +44,14 @@ pub fn is_valid(
 
             Ok(())
         }
+        Action::UseItem(_u) => {
+            // todo: check that the inventory slot exists
+            // todo: check that there is an item in the slot
+            // todo: check that the targets exist
+            // todo: check that the targets are of the right type for the item
+            // todo: check that the targets fulfill the targeting constraints of the item
+            Ok(())
+        }
     }
 }
 
@@ -52,5 +68,6 @@ pub fn execute(action: &Action, actor_id: u128, layer: &mut Layer) {
             actor.set_position(&m.destination);
             println!("position after move: {}", actor.get_position());
         }
+        Action::UseItem(_u) => {}
     }
 }

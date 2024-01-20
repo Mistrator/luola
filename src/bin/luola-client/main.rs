@@ -28,7 +28,7 @@ fn receive_game_state(stream: &mut TcpStream) {
 
     match msg {
         Message::GameState(state) => {
-            let layer: Layer = Layer::reconstruct(state.grid, state.creatures);
+            let layer: Layer = Layer::reconstruct(state.grid, state.creatures, state.items);
             println!("received game state");
             println!("{}", layer);
         }

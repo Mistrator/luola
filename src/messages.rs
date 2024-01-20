@@ -1,6 +1,7 @@
 use crate::creature::action::Action;
 use crate::creature::Creature;
 use crate::grid::Grid;
+use crate::item::Item;
 use crate::world::Layer;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -65,6 +66,7 @@ pub struct ErrorMsg {
 #[derive(Deserialize, Serialize)]
 pub struct GameStateMsg {
     pub creatures: HashMap<u128, Creature>,
+    pub items: HashMap<u128, Item>,
     pub grid: Grid,
 }
 
@@ -72,6 +74,7 @@ impl GameStateMsg {
     pub fn new(layer: &Layer) -> Self {
         Self {
             creatures: layer.creatures.clone(),
+            items: layer.items.clone(),
             grid: layer.grid.clone(),
         }
     }

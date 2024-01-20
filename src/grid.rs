@@ -22,6 +22,7 @@ impl fmt::Display for GridSquare {
 }
 
 // Upper left corner of a grid square.
+#[derive(Deserialize, Serialize)]
 pub struct GridIntersection {
     pub y: i32,
     pub x: i32,
