@@ -22,6 +22,7 @@ pub struct Layer {
     pub grid: Grid,
     pub items: HashMap<u128, Item>,
     pub item_effect: HashMap<u128, Effect>,
+    pub ongoing_effects: HashMap<u128, OngoingEffect>,
 }
 
 impl Layer {

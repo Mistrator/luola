@@ -18,14 +18,14 @@ pub struct MoveAction {
 
 #[derive(Deserialize, Serialize)]
 pub struct UseItemAction {
-    pub inventory_slot: i32,
+    pub inventory_slot: usize,
     pub target: Target,
 }
 
 pub fn is_valid(
     action: &Action,
     _prev_actions: &Vec<Action>,
-    _actor: &Creature,
+    actor: &Creature,
     layer: &Layer,
 ) -> Result<(), String> {
     match action {
@@ -44,12 +44,20 @@ pub fn is_valid(
 
             Ok(())
         }
-        Action::UseItem(_u) => {
-            // todo: check that the inventory slot exists
-            // todo: check that there is an item in the slot
+        Action::UseItem(u) => {
             // todo: check that the targets exist
             // todo: check that the targets are of the right type for the item
             // todo: check that the targets fulfill the targeting constraints of the item
+            let inv = actor.inventory;
+            if !inv.valid_active_slot(u.inventory_slot) {
+                return Err(String::from(format!("active item slot {} does not exist", u.inventory_slot)));
+            }
+
+            let item_id = inv.get_active(u.inventory_slot);
+            if item_id.is_none() {
+                return Err(String::from(format!("active item slot {} is empty", u.inventory_slot)));
+            }
+
             Ok(())
         }
     }
@@ -68,6 +76,13 @@ pub fn execute(action: &Action, actor_id: u128, layer: &mut Layer) {
             actor.set_position(&m.destination);
             println!("position after move: {}", actor.get_position());
         }
-        Action::UseItem(_u) => {}
+        Action::UseItem(u) => {
+            let inv = actor.inventory;
+            let item_id = inv.get_active(u.inventory_slot).expect("the slot should exist and contain an item");
+
+            let effect = layer.item_effect.get(item_id).expect("an item should have an effect");
+
+            // todo: apply the effect at u.target
+        }
     }
 }
