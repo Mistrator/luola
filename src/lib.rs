@@ -1,7 +1,7 @@
 pub mod ai;
+pub mod check;
 pub mod constants;
 pub mod creature;
-pub mod dice;
 pub mod grid;
 pub mod initiative;
 pub mod item;

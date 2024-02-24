@@ -1,9 +1,9 @@
-use crate::item::statistics::Statistics;
 use crate::item::targeting::TargetKind;
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
 
 pub mod effect;
+pub mod item_effects;
 pub mod item_types;
 pub mod statistics;
 pub mod targeting;
@@ -19,13 +19,12 @@ pub struct Item {
     pub name: String,
     pub description: String,
     pub kind: ItemKind,
-    pub stats: Statistics,
 
     id: u128,
 }
 
 impl Item {
-    pub fn new(name: String, description: String, kind: ItemKind, stats: Statistics) -> Self {
+    pub fn new(name: String, description: String, kind: ItemKind) -> Self {
         let mut rng = rand::thread_rng();
         let id = rng.gen();
 
@@ -34,7 +33,6 @@ impl Item {
             name,
             description,
             kind,
-            stats,
         }
     }
     pub fn get_id(&self) -> u128 {

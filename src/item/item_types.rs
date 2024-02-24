@@ -1,5 +1,6 @@
 use crate::item::effect::Effect;
-use crate::item::statistics::{Rarity, Statistics};
+use crate::item::item_effects::*;
+use crate::item::statistics::Rarity;
 use crate::item::targeting::*;
 use crate::item::{Item, ItemKind};
 
@@ -7,16 +8,13 @@ pub fn create_testitem(level: i32, rarity: Rarity) -> (Item, Effect) {
     let name = String::from("testitem");
     let description = String::from("A fancy description");
 
-    let target_params = BurstParams {
+    let target = TargetKind::Area(AreaKind::Burst(BurstParams {
         range: 10,
         radius: 4,
-    };
+    }));
 
-    let target = TargetKind::Area(AreaKind::Burst(target_params));
     let kind = ItemKind::Active(target);
-    let stats = Statistics::new(level, rarity);
+    let effect = create_testeffect(level, rarity);
 
-    let effect = Effect {};
-
-    (Item::new(name, description, kind, stats), effect)
+    (Item::new(name, description, kind), effect)
 }

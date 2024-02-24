@@ -1,7 +1,7 @@
 use crate::ai::AI;
 use crate::creature::Creature;
 use crate::grid::Grid;
-use crate::item::effect::Effect;
+use crate::item::effect::{Effect, OngoingEffect};
 use crate::item::Item;
 use std::collections::HashMap;
 use std::fmt;
@@ -21,7 +21,7 @@ pub struct Layer {
     pub creature_ai: HashMap<u128, AI>,
     pub grid: Grid,
     pub items: HashMap<u128, Item>,
-    pub item_effect: HashMap<u128, Effect>,
+    pub effects: HashMap<u128, Effect>,
     pub ongoing_effects: HashMap<u128, OngoingEffect>,
 }
 
@@ -36,7 +36,8 @@ impl Layer {
             creatures: HashMap::new(),
             creature_ai: HashMap::new(),
             items: HashMap::new(),
-            item_effect: HashMap::new(),
+            effects: HashMap::new(),
+            ongoing_effects: HashMap::new(),
         }
     }
 
@@ -50,7 +51,8 @@ impl Layer {
             creatures: creatures,
             items: items,
             creature_ai: HashMap::new(),
-            item_effect: HashMap::new(),
+            effects: HashMap::new(),
+            ongoing_effects: HashMap::new(),
         }
     }
 
@@ -65,7 +67,7 @@ impl Layer {
         let id = item.get_id();
 
         self.items.insert(id, item);
-        self.item_effect.insert(id, effect);
+        self.effects.insert(id, effect);
     }
 }
 
@@ -80,7 +82,7 @@ impl fmt::Display for Layer {
         }
 
         for (_, item) in &self.items {
-            write!(f, "{} (Level {})\n", item.name, item.stats.get_level())?;
+            write!(f, "{}\n", item.name)?;
             write!(f, "{}\n", item.description)?;
         }
 

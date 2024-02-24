@@ -10,6 +10,15 @@ pub enum LevelScaling {
 }
 
 #[derive(Clone, Deserialize, Serialize)]
+pub enum Proficiency {
+    Extreme,
+    High,
+    Moderate,
+    Low,
+    Terrible,
+}
+
+#[derive(Clone, Deserialize, Serialize)]
 pub struct Stat {
     raw_value: i32,
     level_scaling: LevelScaling,

@@ -1,6 +1,6 @@
 use crate::ai::AI;
+use crate::check;
 use crate::creature::perception::Awareness;
-use crate::dice;
 use crate::world::Layer;
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -15,7 +15,7 @@ impl Initiative {
     fn roll_for_creature(creature_id: u128) -> (i32, u128) {
         // todo: get initiative bonus from creature stats
         let init_bonus: i32 = 0;
-        let init_value = dice::d20() + init_bonus;
+        let init_value = check::d20() + init_bonus;
 
         (init_value, creature_id)
     }

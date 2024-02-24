@@ -22,14 +22,14 @@ impl Inventory {
         self.active_items[slot]
     }
 
-    pub fn replace_active(&self, slot: usize, new_item: u128) -> Option<u128> {
+    pub fn replace_active(&mut self, slot: usize, new_item: u128) -> Option<u128> {
         let old_item = self.active_items[slot];
         self.active_items[slot] = Some(new_item);
 
         old_item
     }
 
-    pub fn drop_active(&self, slot: usize) -> Option<u128> {
+    pub fn drop_active(&mut self, slot: usize) -> Option<u128> {
         let old_item = self.active_items[slot];
         self.active_items[slot] = None;
         old_item

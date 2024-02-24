@@ -1,8 +1,8 @@
-use crate::stat::Stat;
+use crate::stat::{LevelScaling, Proficiency, Stat};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Copy, Clone, Deserialize, Serialize)]
 pub enum Rarity {
     Common,
     Uncommon,
@@ -14,7 +14,7 @@ pub enum Rarity {
 #[derive(Clone, Deserialize, Serialize)]
 pub struct Statistics {
     pub rarity: Rarity,
-    pub stats: HashMap<String, Stat>,
+    pub values: HashMap<String, Stat>,
 
     level: i32,
 }
@@ -24,7 +24,7 @@ impl Statistics {
         Self {
             level: level,
             rarity: rarity,
-            stats: HashMap::new(),
+            values: HashMap::new(),
         }
     }
 
@@ -43,4 +43,36 @@ impl Statistics {
 
         self.level + modifier
     }
+}
+
+pub fn new_single_target_damage(prof: Proficiency) -> Stat {
+    let raw_damage: i32 = match prof {
+        Proficiency::Extreme => 8,
+        Proficiency::High => 6,
+        Proficiency::Moderate => 4,
+        Proficiency::Low => 3,
+        Proficiency::Terrible => 2,
+    };
+
+    // After leveling up this many times, our damage has doubled.
+    let double_after_levels = 2.0;
+    let increase_per_level: f64 = f64::powf(2.0, 1.0 / double_after_levels);
+
+    Stat::new(raw_damage, LevelScaling::Exponential(increase_per_level))
+}
+
+pub fn new_area_damage(prof: Proficiency) -> Stat {
+    let raw_damage: i32 = match prof {
+        Proficiency::Extreme => 6,
+        Proficiency::High => 4,
+        Proficiency::Moderate => 3,
+        Proficiency::Low => 2,
+        Proficiency::Terrible => 1,
+    };
+
+    // After leveling up this many times, our damage has doubled.
+    let double_after_levels = 2.0;
+    let increase_per_level: f64 = f64::powf(2.0, 1.0 / double_after_levels);
+
+    Stat::new(raw_damage, LevelScaling::Exponential(increase_per_level))
 }

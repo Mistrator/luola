@@ -1,7 +1,7 @@
 use crate::grid::{GridIntersection, GridSquare};
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub enum Target {
     Creatures(Vec<u128>),
     Intersection(GridIntersection),

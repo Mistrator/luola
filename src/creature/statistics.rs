@@ -1,21 +1,12 @@
-use crate::stat::{LevelScaling, Stat};
+use crate::stat::{LevelScaling, Proficiency, Stat};
 use serde::{Deserialize, Serialize};
 use std::fmt;
-
-#[derive(Clone, Deserialize, Serialize)]
-pub enum Proficiency {
-    Extreme,
-    High,
-    Moderate,
-    Low,
-    Terrible,
-}
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct Statistics {
     pub level: i32,
 
-    pub current_hp: Stat,
+    pub current_hp: i32,
     pub max_hp: Stat,
 
     pub armor_class: Stat,
@@ -31,6 +22,37 @@ pub struct Statistics {
     pub initiative: Stat,
 
     pub n_actions: Stat,
+
+    pub n_active_items: Stat,
+    pub n_passive_items: Stat,
+}
+
+impl Statistics {
+    pub fn get_default() -> Self {
+        Self {
+            level: 1,
+
+            current_hp: 0,
+            max_hp: new_hp(Proficiency::Moderate),
+
+            armor_class: new_defense(Proficiency::Moderate),
+            fortitude_dc: new_defense(Proficiency::Moderate),
+            reflex_dc: new_defense(Proficiency::Moderate),
+            will_dc: new_defense(Proficiency::Moderate),
+
+            melee_attack: new_attack(Proficiency::Moderate),
+            ranged_attack: new_attack(Proficiency::Moderate),
+            magic_attack: new_attack(Proficiency::Moderate),
+
+            movement_speed: new_speed(Proficiency::Moderate),
+            initiative: new_initiative(Proficiency::Moderate),
+
+            n_active_items: new_inventory(Proficiency::Moderate),
+            n_passive_items: new_inventory(Proficiency::Moderate),
+
+            n_actions: new_actions(Proficiency::Moderate),
+        }
+    }
 }
 
 impl fmt::Display for Statistics {
@@ -42,7 +64,7 @@ impl fmt::Display for Statistics {
         write!(
             f,
             "[Defenses] HP: {}/{}, AC: {}, Fort: {}, Reflex: {}, Will: {}\n",
-            self.current_hp.get_value(level),
+            self.current_hp,
             self.max_hp.get_value(level),
             self.armor_class.get_value(level),
             self.fortitude_dc.get_value(level),
@@ -56,6 +78,13 @@ impl fmt::Display for Statistics {
             self.melee_attack.get_value(level),
             self.ranged_attack.get_value(level),
             self.magic_attack.get_value(level)
+        )?;
+
+        write!(
+            f,
+            "[Inventory slots] Active: {}, Passive: {}\n",
+            self.n_active_items.get_value(level),
+            self.n_passive_items.get_value(level)
         )?;
 
         write!(
@@ -145,6 +174,18 @@ pub fn new_speed(prof: Proficiency) -> Stat {
     };
 
     Stat::new(raw_speed, LevelScaling::NoScaling)
+}
+
+pub fn new_inventory(prof: Proficiency) -> Stat {
+    let raw_inventory_slots = match prof {
+        Proficiency::Extreme => 10,
+        Proficiency::High => 6,
+        Proficiency::Moderate => 4,
+        Proficiency::Low => 2,
+        Proficiency::Terrible => 1,
+    };
+
+    Stat::new(raw_inventory_slots, LevelScaling::NoScaling)
 }
 
 pub fn new_actions(prof: Proficiency) -> Stat {

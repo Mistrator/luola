@@ -1,13 +1,19 @@
 use luola::constants;
-use luola::creature::action::Action;
+use luola::creature::action::{Action, UseItemAction};
+use luola::item::targeting::Target;
 use luola::messages::*;
 use luola::player::Player;
 use luola::world::Layer;
 use std::net::TcpStream;
 use std::{thread, time};
 
-fn act(player: &mut Player) {
-    let cur_action = Action::Idle;
+fn act(player: &mut Player, enemy: u128) {
+    let action_details = UseItemAction {
+        inventory_slot: 0,
+        target: Target::Creatures(vec![enemy]),
+    };
+
+    let cur_action = Action::UseItem(action_details);
     let msg = Message::Act(cur_action);
 
     println!("trying to act");
@@ -23,7 +29,7 @@ fn act(player: &mut Player) {
     receive_game_state(&mut player.socket);
 }
 
-fn receive_game_state(stream: &mut TcpStream) {
+fn receive_game_state(stream: &mut TcpStream) -> Option<Layer> {
     let msg = luola::net::receive(stream);
 
     match msg {
@@ -31,11 +37,15 @@ fn receive_game_state(stream: &mut TcpStream) {
             let layer: Layer = Layer::reconstruct(state.grid, state.creatures, state.items);
             println!("received game state");
             println!("{}", layer);
+
+            return Some(layer);
         }
         other => {
             println!("received unexpected message type: {}", other);
         }
     }
+
+    None
 }
 
 fn join(stream: &mut TcpStream) -> u128 {
@@ -75,15 +85,15 @@ fn open_stream() -> TcpStream {
     stream
 }
 
-fn play(player: &mut Player) {
+fn play(player: &mut Player, enemy: u128) {
     loop {
         let delay = time::Duration::from_millis(1000);
 
         thread::sleep(delay);
-        act(player);
+        act(player, enemy);
 
         thread::sleep(delay);
-        act(player);
+        act(player, enemy);
 
         for _ in 0..4 {
             receive_game_state(&mut player.socket);
@@ -97,7 +107,14 @@ fn main() {
     let player_id = join(&mut stream);
 
     let mut player = Player::build_existing(stream, player_id);
-    receive_game_state(&mut player.socket);
+    let layer = receive_game_state(&mut player.socket).unwrap();
 
-    play(&mut player);
+    let mut enemy_id: u128 = 0;
+    for (id, _) in layer.creatures {
+        if id != player_id {
+            enemy_id = id;
+        }
+    }
+
+    play(&mut player, enemy_id);
 }

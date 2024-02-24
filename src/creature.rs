@@ -21,16 +21,21 @@ pub struct Creature {
 }
 
 impl Creature {
-    pub fn new(name: String, position: GridSquare, stats: Statistics) -> Self {
+    pub fn new(name: String, position: GridSquare, mut stats: Statistics) -> Self {
         let mut rng = rand::thread_rng();
         let id = rng.gen();
+
+        let n_active_items = stats.n_active_items.get_value(stats.level) as usize;
+        let n_passive_items = stats.n_passive_items.get_value(stats.level) as usize;
+
+        stats.current_hp = stats.max_hp.get_value(stats.level);
 
         Self {
             id: id,
             name: name,
             position: position,
             stats: stats,
-            inventory: Inventory::new(),
+            inventory: Inventory::new(n_active_items, n_passive_items),
         }
     }
 
@@ -47,7 +52,19 @@ impl Creature {
         self.position.x = pos.x;
     }
 
+    pub fn change_hp(&mut self, amount: i32) {
+        self.stats.current_hp += amount;
+
+        let max_hp = self.stats.max_hp.get_value(self.stats.level);
+
+        if self.stats.current_hp < 0 {
+            self.stats.current_hp = 0;
+        } else if self.stats.current_hp > max_hp {
+            self.stats.current_hp = max_hp;
+        }
+    }
+
     pub fn is_alive(&self) -> bool {
-        true
+        self.stats.current_hp > 0
     }
 }

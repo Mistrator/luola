@@ -48,14 +48,20 @@ pub fn is_valid(
             // todo: check that the targets exist
             // todo: check that the targets are of the right type for the item
             // todo: check that the targets fulfill the targeting constraints of the item
-            let inv = actor.inventory;
+            let inv = &actor.inventory;
             if !inv.valid_active_slot(u.inventory_slot) {
-                return Err(String::from(format!("active item slot {} does not exist", u.inventory_slot)));
+                return Err(String::from(format!(
+                    "active item slot {} does not exist",
+                    u.inventory_slot
+                )));
             }
 
             let item_id = inv.get_active(u.inventory_slot);
             if item_id.is_none() {
-                return Err(String::from(format!("active item slot {} is empty", u.inventory_slot)));
+                return Err(String::from(format!(
+                    "active item slot {} is empty",
+                    u.inventory_slot
+                )));
             }
 
             Ok(())
@@ -77,12 +83,20 @@ pub fn execute(action: &Action, actor_id: u128, layer: &mut Layer) {
             println!("position after move: {}", actor.get_position());
         }
         Action::UseItem(u) => {
-            let inv = actor.inventory;
-            let item_id = inv.get_active(u.inventory_slot).expect("the slot should exist and contain an item");
+            let inv = &actor.inventory;
+            let item_id = inv
+                .get_active(u.inventory_slot)
+                .expect("the slot should exist and contain an item");
 
-            let effect = layer.item_effect.get(item_id).expect("an item should have an effect");
+            let effect = layer
+                .effects
+                .get(&item_id)
+                .expect("an item should have an effect");
 
-            // todo: apply the effect at u.target
+            let ongoing_effect = (effect.apply)(item_id, actor_id, u.target.clone(), layer);
+            if let Some(e) = ongoing_effect {
+                layer.ongoing_effects.insert(e.get_id(), e);
+            }
         }
     }
 }
