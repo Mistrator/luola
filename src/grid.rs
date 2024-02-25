@@ -9,7 +9,7 @@ pub enum Tile {
     Wall,
 }
 
-#[derive(Clone, Copy, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct GridSquare {
     pub y: i32,
     pub x: i32,
