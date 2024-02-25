@@ -45,7 +45,7 @@ impl Perception {
             // todo: get sense properties from creature stats
             // todo: make obstacles block senses
             let sensing_distance = 5;
-            if gridalgos::distance(&owner_pos, &pos) <= sensing_distance {
+            if gridalgos::distance(owner_pos, pos) <= sensing_distance {
                 println!(
                     "creature {} noticed creature {} while seeking",
                     self.owner_id, *id

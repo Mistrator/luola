@@ -9,7 +9,7 @@ pub enum Tile {
     Wall,
 }
 
-#[derive(Clone, Copy, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct GridSquare {
     pub y: i32,
     pub x: i32,
@@ -52,11 +52,11 @@ impl Grid {
         self.grid[0].len() as i32
     }
 
-    pub fn valid_square(&self, square: &GridSquare) -> bool {
+    pub fn valid_square(&self, square: GridSquare) -> bool {
         square.y >= 0 && square.y < self.height() && square.x >= 0 && square.x < self.width()
     }
 
-    pub fn free_square(&self, square: &GridSquare) -> bool {
+    pub fn free_square(&self, square: GridSquare) -> bool {
         if !self.valid_square(square) {
             return false;
         }
@@ -68,15 +68,15 @@ impl Grid {
         return true;
     }
 
-    pub fn get_tile(&self, square: &GridSquare) -> Option<&Tile> {
-        if !self.valid_square(&square) {
+    pub fn get_tile(&self, square: GridSquare) -> Option<&Tile> {
+        if !self.valid_square(square) {
             return None;
         }
         Some(&self.grid[square.y as usize][square.x as usize])
     }
 
     pub fn set_tile(&mut self, square: GridSquare, tile: Tile) {
-        if !self.valid_square(&square) {
+        if !self.valid_square(square) {
             panic!("out of bounds write to grid square {}", square);
         }
         self.grid[square.y as usize][square.x as usize] = tile;
@@ -88,7 +88,7 @@ impl fmt::Display for Grid {
         for i in 0..self.height() {
             for j in 0..self.width() {
                 let square = GridSquare { y: i, x: j };
-                let tile = self.get_tile(&square).unwrap();
+                let tile = self.get_tile(square).unwrap();
 
                 match tile {
                     Tile::Empty => write!(f, "."),
