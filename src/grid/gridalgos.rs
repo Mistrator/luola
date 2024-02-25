@@ -82,6 +82,8 @@ pub fn find_all_shortest_paths(
     let mut pq: BinaryHeap<(i32, (GridSquare, usize))> = BinaryHeap::new();
     let inf: i32 = 1000000005;
 
+    assert!(!source.is_empty());
+
     for sq in source.clone() {
         distance[0].insert(sq, 0);
         predecessor[0].insert(sq, None);
@@ -168,7 +170,17 @@ pub fn find_all_shortest_paths(
     }
 }
 
-pub fn extract_shortest_path(paths: &ShortestPaths, target: GridSquare) -> Option<Vec<GridSquare>> {
+pub fn get_reachable_squares(paths: &ShortestPaths) -> Vec<GridSquare> {
+    let mut reachable: Vec<GridSquare> = Vec::new();
+
+    for (sq, _) in &paths.distance {
+        reachable.push(*sq);
+    }
+
+    reachable
+}
+
+pub fn get_shortest_path(paths: &ShortestPaths, target: GridSquare) -> Option<Vec<GridSquare>> {
     let mut result: Vec<GridSquare> = Vec::new();
 
     if !paths.predecessor.contains_key(&target) {

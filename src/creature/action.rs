@@ -1,4 +1,5 @@
 use crate::creature::Creature;
+use crate::grid::gridalgos;
 use crate::grid::GridSquare;
 use crate::item::targeting::Target;
 use crate::world::Layer;
@@ -31,6 +32,9 @@ pub fn is_valid(
     match action {
         Action::Idle => Ok(()),
         Action::Move(m) => {
+            let source = actor.get_position();
+            let movement_speed = actor.stats.movement_speed.get_value(actor.stats.level);
+
             if !layer.grid.valid_square(m.destination) {
                 return Err(String::from("move destination square is outside the grid"));
             }
@@ -39,8 +43,20 @@ pub fn is_valid(
                 return Err(String::from("move destination square is not empty"));
             }
 
-            // todo: check that the destination is not too far away for the creature
-            // todo: check that there is an unobstructed path to the destination square
+            #[rustfmt::skip]
+            let all_paths = gridalgos::find_all_shortest_paths(
+                &vec![source],
+                movement_speed,
+                &layer.grid,
+            );
+
+            let shortest_path = gridalgos::get_shortest_path(&all_paths, m.destination);
+
+            if shortest_path.is_none() {
+                return Err(String::from(
+                    "move destination square not reachable or too far away",
+                ));
+            }
 
             Ok(())
         }

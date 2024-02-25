@@ -2,10 +2,13 @@ use crate::creature::action::Action;
 use crate::creature::perception::{Awareness, Perception};
 use crate::world::Layer;
 
+mod wander;
+
 #[derive(Clone, Copy)]
 pub enum Behavior {
     PlayerControlled(u128),
     Inactive,
+    Wandering,
 }
 
 pub struct AI {
@@ -18,15 +21,20 @@ pub struct AI {
 }
 
 impl AI {
-    pub fn new(id: u128) -> Self {
+    pub fn new(
+        owner_id: u128,
+        default_wander_behavior: Behavior,
+        default_combat_behavior: Behavior,
+    ) -> Self {
         Self {
-            owner_id: id,
-            perception: Perception::new(id),
-            default_wander_behavior: Behavior::Inactive,
-            default_combat_behavior: Behavior::Inactive,
+            owner_id,
+            perception: Perception::new(owner_id),
+            default_wander_behavior,
+            default_combat_behavior,
             override_behavior: None,
         }
     }
+
     pub fn get_wander_behavior(&self) -> Behavior {
         self.override_behavior
             .unwrap_or(self.default_wander_behavior)
@@ -57,7 +65,7 @@ impl AI {
     }
 }
 
-pub fn act(actor: &AI, _layer: &Layer) -> Action {
+pub fn act(actor: &AI, layer: &Layer) -> Action {
     let actor_behavior = match actor.perception.get_awareness() {
         Awareness::Wander => actor.get_wander_behavior(),
         Awareness::Combat => actor.get_combat_behavior(),
@@ -68,5 +76,6 @@ pub fn act(actor: &AI, _layer: &Layer) -> Action {
             panic!("AI can't control player-controlled characters");
         }
         Behavior::Inactive => Action::Idle,
+        Behavior::Wandering => wander::act(actor, layer),
     }
 }
