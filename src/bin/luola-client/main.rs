@@ -123,7 +123,7 @@ fn main() {
 
     let width: usize = 80;
     let height: usize = 24;
-    let mut terminal = Terminal::new(width, height);
+    let mut terminal = Terminal::init(width, height);
 
     for i in 0..height {
         for j in 0..width {
@@ -138,5 +138,8 @@ fn main() {
 
     terminal.render_next();
 
-    play(&mut player, enemy_id);
+    let delay = time::Duration::from_millis(2000);
+    thread::sleep(delay);
+
+    // play(&mut player, enemy_id);
 }

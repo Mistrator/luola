@@ -4,6 +4,18 @@ fn prefix() -> String {
     String::from("\x1b[")
 }
 
+pub fn clear_screen() -> String {
+    format!("{}2J", prefix())
+}
+
+pub fn use_alternate_screen_buffer() -> String {
+    format!("{}?1049h", prefix())
+}
+
+pub fn use_main_screen_buffer() -> String {
+    format!("{}?1049l", prefix())
+}
+
 pub fn set_cursor_position(row: usize, column: usize) -> String {
     assert!(row >= 1 && column >= 1, "indexing is 1-based");
 

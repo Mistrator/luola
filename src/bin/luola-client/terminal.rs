@@ -15,7 +15,10 @@ pub struct Terminal {
 }
 
 impl Terminal {
-    pub fn new(width: usize, height: usize) -> Self {
+    pub fn init(width: usize, height: usize) -> Self {
+        println!("{}", ansi_sequences::use_alternate_screen_buffer());
+        println!("{}", ansi_sequences::clear_screen());
+
         Self {
             width,
             height,
@@ -39,5 +42,12 @@ impl Terminal {
 
         mem::swap(&mut self.current_frame, &mut self.next_frame);
         self.next_frame = Canvas::new(self.width, self.height);
+    }
+}
+
+impl Drop for Terminal {
+    fn drop(&mut self) {
+        println!("{}", ansi_sequences::clear_screen());
+        println!("{}", ansi_sequences::use_main_screen_buffer());
     }
 }
