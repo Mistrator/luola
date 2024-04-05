@@ -1,3 +1,6 @@
+use crate::terminal::color::Color;
+use crate::terminal::styled_char::Style;
+use crate::terminal::Terminal;
 use luola::constants;
 use luola::creature::action::{Action, UseItemAction};
 use luola::item::targeting::Target;
@@ -6,6 +9,8 @@ use luola::player::Player;
 use luola::world::Layer;
 use std::net::TcpStream;
 use std::{thread, time};
+
+mod terminal;
 
 fn act(player: &mut Player, enemy: u128) {
     let action_details = UseItemAction {
@@ -115,6 +120,23 @@ fn main() {
             enemy_id = id;
         }
     }
+
+    let width: usize = 80;
+    let height: usize = 24;
+    let mut terminal = Terminal::new(width, height);
+
+    for i in 0..height {
+        for j in 0..width {
+            let c = String::from(" ");
+            let style = Style {
+                foreground_color: Color::White,
+                background_color: Color::RGB((10 * i) as u8, 0, (3 * j) as u8),
+            };
+            terminal.next_frame.write(i, j, c, style);
+        }
+    }
+
+    terminal.render_next();
 
     play(&mut player, enemy_id);
 }
