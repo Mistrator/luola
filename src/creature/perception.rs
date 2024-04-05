@@ -91,11 +91,11 @@ impl Perception {
     }
 
     pub fn get_friendly_observations(&self) -> Vec<Observation> {
-        Vec::new()
+        panic!("unimplemented");
     }
 
     pub fn get_hostile_observations(&self) -> Vec<Observation> {
-        Vec::new()
+        panic!("unimplemented");
     }
 
     pub fn get_awareness(&self) -> Awareness {

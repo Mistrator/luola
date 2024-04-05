@@ -35,7 +35,12 @@ impl Item {
             kind,
         }
     }
+
     pub fn get_id(&self) -> u128 {
         self.id
+    }
+
+    pub fn get_max_effective_range(&self) -> Option<i32> {
+        
     }
 }

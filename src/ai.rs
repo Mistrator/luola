@@ -2,6 +2,7 @@ use crate::creature::action::Action;
 use crate::creature::perception::{Awareness, Perception};
 use crate::world::Layer;
 
+mod melee_brute;
 mod wander;
 
 #[derive(Clone, Copy)]
@@ -9,6 +10,7 @@ pub enum Behavior {
     PlayerControlled(u128),
     Inactive,
     Wandering,
+    MeleeBrute,
 }
 
 pub struct AI {
@@ -76,6 +78,7 @@ pub fn act(actor: &AI, layer: &Layer) -> Action {
             panic!("AI can't control player-controlled characters");
         }
         Behavior::Inactive => Action::Idle,
+        Behavior::MeleeBrute => melee_brute::act(actor, layer),
         Behavior::Wandering => wander::act(actor, layer),
     }
 }
