@@ -158,6 +158,10 @@ fn main() {
             canvas.write(c, style);
         }
     }
+    canvas.set_cursor_position(2, 0);
+    canvas.write(String::from("ab"), style);
+    canvas.write_newline();
+    canvas.write(String::from("cd"), style);
 
     terminal.next_frame.paste(&canvas, 8, 32);
 

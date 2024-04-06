@@ -35,14 +35,22 @@ impl Canvas {
 
     pub fn write(&mut self, content: String, style: Style) {
         for c in content.chars() {
+            if c == '\n' {
+                panic!("writing newlines not allowed, breaks formatting");
+            }
+
             self.content[self.cursor_row][self.cursor_column] = StyledChar::new(c, style);
 
             self.cursor_column += 1;
             if self.cursor_column >= self.width {
-                self.cursor_row += 1;
-                self.cursor_column = 0;
+                self.write_newline();
             }
         }
+    }
+
+    pub fn write_newline(&mut self) {
+        self.cursor_row += 1;
+        self.cursor_column = 0;
     }
 
     pub fn paste(&mut self, other: &Canvas, row: usize, column: usize) {
