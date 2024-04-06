@@ -4,6 +4,8 @@ pub struct Canvas {
     width: usize,
     height: usize,
     content: Vec<Vec<StyledChar>>,
+    cursor_row: usize,
+    cursor_column: usize,
 }
 
 impl Canvas {
@@ -12,12 +14,25 @@ impl Canvas {
             width,
             height,
             content: vec![vec![StyledChar::new_default(); width]; height],
+            cursor_row: 0,
+            cursor_column: 0,
         }
     }
 
-    pub fn write(&mut self, row: usize, column: usize, content: String, style: Style) {
-        for (i, c) in content.chars().enumerate() {
-            self.content[row][column + i] = StyledChar::new(c, style);
+    pub fn set_cursor_position(&mut self, row: usize, column: usize) {
+        self.cursor_row = row;
+        self.cursor_column = column;
+    }
+
+    pub fn write(&mut self, content: String, style: Style) {
+        for c in content.chars() {
+            self.content[self.cursor_row][self.cursor_column] = StyledChar::new(c, style);
+
+            self.cursor_column += 1;
+            if self.cursor_column >= self.width {
+                self.cursor_row += 1;
+                self.cursor_column = 0;
+            }
         }
     }
 

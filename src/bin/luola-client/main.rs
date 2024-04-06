@@ -132,9 +132,18 @@ fn main() {
                 foreground_color: Color::White,
                 background_color: Color::RGB((10 * i) as u8, 0, (3 * j) as u8),
             };
-            terminal.next_frame.write(i, j, c, style);
+            terminal.next_frame.set_cursor_position(i, j);
+            terminal.next_frame.write(c, style);
         }
     }
+
+    let msg = String::from("testmessage");
+    let style = Style {
+        foreground_color: Color::Green,
+        background_color: Color::Black,
+    };
+    terminal.next_frame.set_cursor_position(10, width - 5);
+    terminal.next_frame.write(msg, style);
 
     terminal.render_next();
 
