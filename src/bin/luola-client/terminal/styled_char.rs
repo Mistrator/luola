@@ -21,6 +21,22 @@ impl Style {
 
         format!("{}{}", foreground, background)
     }
+
+    pub fn color_passthrough(upper: Style, lower: Style) -> Style {
+        assert!(lower.foreground_color != Color::Transparent);
+        assert!(lower.background_color != Color::Transparent);
+
+        let mut new_style = upper;
+
+        if new_style.foreground_color == Color::Transparent {
+            new_style.foreground_color = lower.foreground_color;
+        }
+        if new_style.background_color == Color::Transparent {
+            new_style.background_color = lower.background_color;
+        }
+
+        new_style
+    }
 }
 
 #[derive(Clone, Copy)]

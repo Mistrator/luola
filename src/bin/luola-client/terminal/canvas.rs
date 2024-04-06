@@ -39,6 +39,9 @@ impl Canvas {
                 panic!("writing newlines not allowed, breaks formatting");
             }
 
+            let current_c = self.content[self.cursor_row][self.cursor_column];
+            let style = Style::color_passthrough(style, current_c.style);
+
             self.content[self.cursor_row][self.cursor_column] = StyledChar::new(c, style);
 
             self.cursor_column += 1;
@@ -68,12 +71,8 @@ impl Canvas {
                 let current_c = self.content[row + i][column + j];
                 let mut pasted_c = *c;
 
-                if pasted_c.style.foreground_color == Color::Transparent {
-                    pasted_c.style.foreground_color = current_c.style.foreground_color;
-                }
-                if pasted_c.style.background_color == Color::Transparent {
-                    pasted_c.style.background_color = current_c.style.background_color;
-                }
+                let style = Style::color_passthrough(pasted_c.style, current_c.style);
+                pasted_c.style = style;
 
                 self.content[row + i][column + j] = pasted_c;
             }

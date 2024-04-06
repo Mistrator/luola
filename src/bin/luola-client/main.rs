@@ -141,7 +141,7 @@ fn main() {
     let msg = String::from("testmessage");
     let style = Style {
         foreground_color: Color::Green,
-        background_color: Color::Black,
+        background_color: Color::Transparent,
     };
     terminal.next_frame.set_cursor_position(10, width - 5);
     terminal.next_frame.write(msg, style);
