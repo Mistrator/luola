@@ -37,6 +37,7 @@ fn color_str(color: Color) -> String {
         Color::Cyan => String::from("6"),
         Color::White => String::from("7"),
         Color::RGB(r, g, b) => format!("8;2;{};{};{}", r, g, b),
+        Color::Transparent => panic!("must have a color"),
     }
 }
 

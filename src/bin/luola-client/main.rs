@@ -1,3 +1,4 @@
+use crate::terminal::canvas::Canvas;
 use crate::terminal::color::Color;
 use crate::terminal::styled_char::Style;
 use crate::terminal::Terminal;
@@ -145,9 +146,24 @@ fn main() {
     terminal.next_frame.set_cursor_position(10, width - 5);
     terminal.next_frame.write(msg, style);
 
+    let mut canvas = Canvas::new(15, 10);
+    for i in 0..canvas.get_height() {
+        for j in 0..canvas.get_width() {
+            let c = String::from(" ");
+            let style = Style {
+                foreground_color: Color::White,
+                background_color: Color::RGB(0, (10 * i) as u8, (10 * j) as u8),
+            };
+            canvas.set_cursor_position(i, j);
+            canvas.write(c, style);
+        }
+    }
+
+    terminal.next_frame.paste(&canvas, 8, 32);
+
     terminal.render_next();
 
-    let delay = time::Duration::from_millis(2000);
+    let delay = time::Duration::from_millis(5000);
     thread::sleep(delay);
 
     // play(&mut player, enemy_id);

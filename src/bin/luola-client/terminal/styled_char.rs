@@ -26,7 +26,7 @@ impl Style {
 #[derive(Clone, Copy)]
 pub struct StyledChar {
     content: char,
-    style: Style,
+    pub style: Style,
 }
 
 impl StyledChar {

@@ -2,7 +2,7 @@ use crate::terminal::canvas::Canvas;
 use std::mem;
 
 mod ansi_sequences;
-mod canvas;
+pub mod canvas;
 pub mod color;
 pub mod styled_char;
 

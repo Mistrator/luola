@@ -1,3 +1,4 @@
+use crate::terminal::color::Color;
 use crate::terminal::styled_char::{Style, StyledChar};
 
 pub struct Canvas {
@@ -19,6 +20,14 @@ impl Canvas {
         }
     }
 
+    pub fn get_width(&self) -> usize {
+        self.width
+    }
+
+    pub fn get_height(&self) -> usize {
+        self.height
+    }
+
     pub fn set_cursor_position(&mut self, row: usize, column: usize) {
         self.cursor_row = row;
         self.cursor_column = column;
@@ -32,6 +41,33 @@ impl Canvas {
             if self.cursor_column >= self.width {
                 self.cursor_row += 1;
                 self.cursor_column = 0;
+            }
+        }
+    }
+
+    pub fn paste(&mut self, other: &Canvas, row: usize, column: usize) {
+        assert!(
+            row + other.get_height() <= self.height,
+            "pasted canvas not contained in this canvas"
+        );
+        assert!(
+            column + other.get_width() <= self.width,
+            "pasted canvas not contained in this canvas"
+        );
+
+        for (i, content_row) in other.content.iter().enumerate() {
+            for (j, c) in content_row.iter().enumerate() {
+                let current_c = self.content[row + i][column + j];
+                let mut pasted_c = *c;
+
+                if pasted_c.style.foreground_color == Color::Transparent {
+                    pasted_c.style.foreground_color = current_c.style.foreground_color;
+                }
+                if pasted_c.style.background_color == Color::Transparent {
+                    pasted_c.style.background_color = current_c.style.background_color;
+                }
+
+                self.content[row + i][column + j] = pasted_c;
             }
         }
     }

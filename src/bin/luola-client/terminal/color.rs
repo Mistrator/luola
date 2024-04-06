@@ -1,4 +1,4 @@
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum Color {
     Black,
     Red,
@@ -9,4 +9,5 @@ pub enum Color {
     Cyan,
     White,
     RGB(u8, u8, u8),
+    Transparent,
 }
