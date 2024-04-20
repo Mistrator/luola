@@ -39,6 +39,7 @@ name = "luola"
 version = "0.1.0"
 dependencies = [
  "bincode",
+ "libc",
  "rand",
  "rand_chacha",
  "serde",
