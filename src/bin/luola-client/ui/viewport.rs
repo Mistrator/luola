@@ -13,22 +13,36 @@ pub struct Viewport {
     pub top_left: GridSquare,
     pub width_squares: usize,
     pub height_squares: usize,
+
+    pub selection: GridSquare,
 }
 
 impl Viewport {
     pub fn new(width: usize, height: usize) -> Self {
+        let width_squares = width / TILE_WIDTH;
+        let height_squares = height / TILE_HEIGHT;
+
         Self {
             top_left: GridSquare { y: 0, x: 0 },
-            width_squares: width / TILE_WIDTH,
-            height_squares: height / TILE_HEIGHT,
+            width_squares,
+            height_squares,
+            selection: GridSquare {
+                y: (height_squares / 2) as i32,
+                x: (width_squares / 2) as i32,
+            },
         }
     }
 
     pub fn render(&self, layer: &Layer) -> Canvas {
         let mut grid = self.render_grid(&layer.grid);
-        let creatures = self.render_creatures(&layer.creatures);
 
+        let creatures = self.render_creatures(&layer.creatures);
         grid.paste(&creatures, 0, 0);
+
+        let selection = self.render_selection();
+        let canvas_row = (self.selection.y as usize) * TILE_HEIGHT;
+        let canvas_column = (self.selection.x as usize) * TILE_WIDTH;
+        grid.paste(&selection, canvas_row, canvas_column);
 
         grid
     }
@@ -148,6 +162,21 @@ impl Viewport {
         // "black large circle"
         // If the space after is removed, the circle is drawn only partially
         canvas.write(String::from("\u{2b24} "), style);
+
+        canvas
+    }
+
+    fn render_selection(&self) -> Canvas {
+        let mut canvas = Canvas::new_transparent(TILE_WIDTH, TILE_HEIGHT);
+
+        let style = Style {
+            foreground_color: Color::BrightBlue,
+            background_color: Color::Transparent,
+        };
+
+        // rounded corners
+        canvas.write(String::from("\u{256d}  \u{256e}"), style);
+        canvas.write(String::from("\u{2570}  \u{256f}"), style);
 
         canvas
     }
