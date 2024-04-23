@@ -20,6 +20,16 @@ impl Canvas {
         }
     }
 
+    pub fn new_transparent(width: usize, height: usize) -> Self {
+        Self {
+            width,
+            height,
+            content: vec![vec![StyledChar::new_transparent(); width]; height],
+            cursor_row: 0,
+            cursor_column: 0,
+        }
+    }
+
     pub fn get_width(&self) -> usize {
         self.width
     }
@@ -69,12 +79,11 @@ impl Canvas {
         for (i, content_row) in other.content.iter().enumerate() {
             for (j, c) in content_row.iter().enumerate() {
                 let current_c = self.content[row + i][column + j];
-                let mut pasted_c = *c;
+                let pasted_c = *c;
 
-                let style = Style::color_passthrough(pasted_c.style, current_c.style);
-                pasted_c.style = style;
+                let merged_c = StyledChar::merge(pasted_c, current_c);
 
-                self.content[row + i][column + j] = pasted_c;
+                self.content[row + i][column + j] = merged_c;
             }
         }
     }

@@ -3,7 +3,7 @@ use std::fmt;
 
 pub mod gridalgos;
 
-#[derive(Clone, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Deserialize, PartialEq, Serialize)]
 pub enum Tile {
     Empty,
     Wall,
@@ -61,18 +61,18 @@ impl Grid {
             return false;
         }
 
-        if *self.get_tile(square).unwrap() != Tile::Empty {
+        if self.get_tile(square).unwrap() != Tile::Empty {
             return false;
         }
 
         return true;
     }
 
-    pub fn get_tile(&self, square: GridSquare) -> Option<&Tile> {
+    pub fn get_tile(&self, square: GridSquare) -> Option<Tile> {
         if !self.valid_square(square) {
             return None;
         }
-        Some(&self.grid[square.y as usize][square.x as usize])
+        Some(self.grid[square.y as usize][square.x as usize])
     }
 
     pub fn set_tile(&mut self, square: GridSquare, tile: Tile) {

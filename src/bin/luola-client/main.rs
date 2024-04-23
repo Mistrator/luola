@@ -2,6 +2,7 @@ use crate::terminal::canvas::Canvas;
 use crate::terminal::color::Color;
 use crate::terminal::styled_char::Style;
 use crate::terminal::Terminal;
+use crate::ui::UI;
 use luola::constants;
 use luola::creature::action::{Action, UseItemAction};
 use luola::item::targeting::Target;
@@ -12,6 +13,7 @@ use std::net::TcpStream;
 use std::{thread, time};
 
 mod terminal;
+mod ui;
 
 fn act(player: &mut Player, enemy: u128) {
     let action_details = UseItemAction {
@@ -22,15 +24,15 @@ fn act(player: &mut Player, enemy: u128) {
     let cur_action = Action::UseItem(action_details);
     let msg = Message::Act(cur_action);
 
-    println!("trying to act");
+    // println!("trying to act");
     luola::net::send(&mut player.socket, &msg);
 
     let response = luola::net::receive(&mut player.socket);
-    match response {
+    /*match response {
         Message::ActionOk => println!("action ok"),
         Message::ActionError(err) => println!("action rejected: {}", err.message),
         other => println!("received unexpected message type: {}", other),
-    }
+    }*/
 
     receive_game_state(&mut player.socket);
 }
@@ -41,13 +43,13 @@ fn receive_game_state(stream: &mut TcpStream) -> Option<Layer> {
     match msg {
         Message::GameState(state) => {
             let layer: Layer = Layer::reconstruct(state.grid, state.creatures, state.items);
-            println!("received game state");
-            println!("{}", layer);
+            // println!("received game state");
+            // println!("{}", layer);
 
             return Some(layer);
         }
         other => {
-            println!("received unexpected message type: {}", other);
+            // println!("received unexpected message type: {}", other);
         }
     }
 
@@ -125,50 +127,26 @@ fn main() {
     let width: usize = 80;
     let height: usize = 24;
     let mut terminal = Terminal::init(width, height);
-
-    for i in 0..height {
-        for j in 0..width {
-            let c = String::from(" ");
-            let style = Style {
-                foreground_color: Color::White,
-                background_color: Color::RGB((10 * i) as u8, 0, (3 * j) as u8),
-            };
-            terminal.next_frame.set_cursor_position(i, j);
-            terminal.next_frame.write(c, style);
-        }
-    }
-
-    let msg = String::from("testmessage");
-    let style = Style {
-        foreground_color: Color::Green,
-        background_color: Color::Transparent,
-    };
-    terminal.next_frame.set_cursor_position(10, width - 5);
-    terminal.next_frame.write(msg, style);
-
-    let mut canvas = Canvas::new(15, 10);
-    for i in 0..canvas.get_height() {
-        for j in 0..canvas.get_width() {
-            let c = String::from(" ");
-            let style = Style {
-                foreground_color: Color::White,
-                background_color: Color::RGB(0, (10 * i) as u8, (10 * j) as u8),
-            };
-            canvas.set_cursor_position(i, j);
-            canvas.write(c, style);
-        }
-    }
-    canvas.set_cursor_position(2, 0);
-    canvas.write(String::from("ab"), style);
-    canvas.write_newline();
-    canvas.write(String::from("cd"), style);
-
-    terminal.next_frame.paste(&canvas, 8, 32);
-
-    terminal.render_next();
-
-    let delay = time::Duration::from_millis(5000);
-    thread::sleep(delay);
+    let ui = UI::new(width, height);
 
     // play(&mut player, enemy_id);
+
+    loop {
+        let delay = time::Duration::from_millis(1000);
+
+        thread::sleep(delay);
+        act(&mut player, enemy_id);
+
+        thread::sleep(delay);
+        act(&mut player, enemy_id);
+
+        for _ in 0..4 {
+            receive_game_state(&mut player.socket);
+            let layer = receive_game_state(&mut player.socket).unwrap();
+
+            let rendered_ui = ui.render(&layer);
+            terminal.next_frame.paste(&rendered_ui, 0, 0);
+            terminal.render_next();
+        }
+    }
 }
