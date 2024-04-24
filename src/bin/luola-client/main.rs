@@ -127,7 +127,8 @@ fn main() {
     let width: usize = 80;
     let height: usize = 24;
     let mut terminal = Terminal::init(width, height);
-    let ui = UI::new(width, height);
+    let mut ui = UI::new(width, height);
+    ui.select_creature(enemy_id);
 
     // play(&mut player, enemy_id);
 

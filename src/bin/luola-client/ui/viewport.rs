@@ -10,11 +10,11 @@ const TILE_WIDTH: usize = 2 * TILE_HEIGHT;
 const TILE_HEIGHT: usize = 2;
 
 pub struct Viewport {
-    pub top_left: GridSquare,
-    pub width_squares: usize,
-    pub height_squares: usize,
+    top_left: GridSquare,
+    width_squares: usize,
+    height_squares: usize,
 
-    pub selection: GridSquare,
+    selection: GridSquare,
 }
 
 impl Viewport {
