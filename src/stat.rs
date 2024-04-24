@@ -40,23 +40,10 @@ impl Stat {
     pub fn get_value(&self, level: i32) -> i32 {
         let mut val: f64 = self.raw_value as f64;
 
+        val = self.scale_by_level(val, level);
+
         val += self.get_total_additive_modifier() as f64;
         val *= self.get_total_multiplicative_modifier();
-
-        match self.level_scaling {
-            LevelScaling::Linear(increment) => {
-                val += (level * increment) as f64;
-            }
-            LevelScaling::Exponential(base) => {
-                // Our level scale starts from constants::MIN_LEVEL instead of 1,
-                // so shift levels so that MIN_LEVEL is mapped to level 1.
-                let shift: i32 = 1 - constants::MIN_LEVEL;
-                let shifted_level = level + shift;
-
-                val *= base.powi(shifted_level);
-            }
-            LevelScaling::NoScaling => (),
-        }
 
         val as i32
     }
@@ -65,7 +52,34 @@ impl Stat {
         self.raw_value
     }
 
-    fn get_total_additive_modifier(&self) -> i32 {
+    pub fn get_value_without_modifiers(&self, level: i32) -> i32 {
+        let val: f64 = self.raw_value as f64;
+
+        self.scale_by_level(val, level) as i32
+    }
+
+    fn scale_by_level(&self, val: f64, level: i32) -> f64 {
+        let mut scaled_val = val;
+
+        match self.level_scaling {
+            LevelScaling::Linear(increment) => {
+                scaled_val += (level * increment) as f64;
+            }
+            LevelScaling::Exponential(base) => {
+                // Our level scale starts from constants::MIN_LEVEL instead of 1,
+                // so shift levels so that MIN_LEVEL is mapped to level 1.
+                let shift: i32 = 1 - constants::MIN_LEVEL;
+                let shifted_level = level + shift;
+
+                scaled_val *= base.powi(shifted_level);
+            }
+            LevelScaling::NoScaling => (),
+        }
+
+        scaled_val
+    }
+
+    pub fn get_total_additive_modifier(&self) -> i32 {
         let mut additive_mod: i32 = 0;
 
         for (_, m) in &self.additive_modifiers {
@@ -75,7 +89,7 @@ impl Stat {
         additive_mod
     }
 
-    fn get_total_multiplicative_modifier(&self) -> f64 {
+    pub fn get_total_multiplicative_modifier(&self) -> f64 {
         let mut multiplicative_mod: f64 = 1.0;
 
         for (_, m) in &self.multiplicative_modifiers {
@@ -83,6 +97,10 @@ impl Stat {
         }
 
         multiplicative_mod
+    }
+
+    pub fn is_modified(&self) -> bool {
+        self.get_total_additive_modifier() != 0 || self.get_total_multiplicative_modifier() != 1.0
     }
 
     pub fn apply_additive_modifier(&mut self, modifier_id: u128, modifier: i32) {
