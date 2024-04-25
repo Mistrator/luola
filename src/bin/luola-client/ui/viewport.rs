@@ -1,6 +1,7 @@
 use crate::terminal::canvas::Canvas;
 use crate::terminal::color::Color;
 use crate::terminal::styled_char::Style;
+use crate::ui::color_scheme;
 use luola::creature::Creature;
 use luola::grid::{Grid, GridSquare, Tile};
 use luola::world::Layer;
@@ -169,14 +170,15 @@ impl Viewport {
     fn render_selection(&self) -> Canvas {
         let mut canvas = Canvas::new_transparent(TILE_WIDTH, TILE_HEIGHT);
 
-        let style = Style {
-            foreground_color: Color::BrightBlue,
-            background_color: Color::Transparent,
-        };
-
         // rounded corners
-        canvas.write(String::from("\u{256d}  \u{256e}"), style);
-        canvas.write(String::from("\u{2570}  \u{256f}"), style);
+        canvas.write(
+            String::from("\u{256d}  \u{256e}"),
+            color_scheme::SELECTION_STYLE,
+        );
+        canvas.write(
+            String::from("\u{2570}  \u{256f}"),
+            color_scheme::SELECTION_STYLE,
+        );
 
         canvas
     }
