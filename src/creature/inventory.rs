@@ -2,36 +2,39 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct Inventory {
-    active_items: Vec<Option<u128>>,
-    passive_items: Vec<Option<u128>>,
+    items: Vec<Option<u128>>,
 }
 
 impl Inventory {
-    pub fn new(n_active: usize, n_passive: usize) -> Self {
+    pub fn new(n_slots: usize) -> Self {
         Self {
-            active_items: vec![None; n_active],
-            passive_items: vec![None; n_passive],
+            items: vec![None; n_slots],
         }
     }
 
-    pub fn valid_active_slot(&self, slot: usize) -> bool {
-        slot < self.active_items.len()
+    pub fn len(&self) -> usize {
+        self.items.len()
     }
 
-    pub fn get_active(&self, slot: usize) -> Option<u128> {
-        self.active_items[slot]
+    pub fn valid_slot(&self, slot: usize) -> bool {
+        slot < self.len()
     }
 
-    pub fn replace_active(&mut self, slot: usize, new_item: u128) -> Option<u128> {
-        let old_item = self.active_items[slot];
-        self.active_items[slot] = Some(new_item);
+    pub fn get_item(&self, slot: usize) -> Option<u128> {
+        self.items[slot]
+    }
+
+    pub fn replace_item(&mut self, slot: usize, new_item: u128) -> Option<u128> {
+        let old_item = self.get_item(slot);
+        self.items[slot] = Some(new_item);
 
         old_item
     }
 
-    pub fn drop_active(&mut self, slot: usize) -> Option<u128> {
-        let old_item = self.active_items[slot];
-        self.active_items[slot] = None;
+    pub fn drop_item(&mut self, slot: usize) -> Option<u128> {
+        let old_item = self.items[slot];
+        self.items[slot] = None;
+
         old_item
     }
 }

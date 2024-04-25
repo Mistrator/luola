@@ -23,8 +23,7 @@ pub struct Statistics {
 
     pub n_actions: Stat,
 
-    pub n_active_items: Stat,
-    pub n_passive_items: Stat,
+    pub inventory_slots: Stat,
 }
 
 impl Statistics {
@@ -47,8 +46,7 @@ impl Statistics {
             movement_speed: new_speed(Proficiency::Moderate),
             initiative: new_initiative(Proficiency::Moderate),
 
-            n_active_items: new_inventory(Proficiency::Moderate),
-            n_passive_items: new_inventory(Proficiency::Moderate),
+            inventory_slots: new_inventory(Proficiency::Moderate),
 
             n_actions: new_actions(Proficiency::Moderate),
         }
@@ -82,17 +80,11 @@ impl fmt::Display for Statistics {
 
         write!(
             f,
-            "[Inventory slots] Active: {}, Passive: {}\n",
-            self.n_active_items.get_value(level),
-            self.n_passive_items.get_value(level)
-        )?;
-
-        write!(
-            f,
-            "[Other] Speed: {}, Initiative: {}, Actions: {}\n",
+            "[Other] Speed: {}, Initiative: {}, Actions: {}, Inventory slots: {}\n",
             self.movement_speed.get_value(level),
             self.initiative.get_value(level),
-            self.n_actions.get_value(level)
+            self.n_actions.get_value(level),
+            self.inventory_slots.get_value(level)
         )?;
 
         Ok(())

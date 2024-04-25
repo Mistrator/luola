@@ -32,7 +32,7 @@ pub fn generate_layer(layer_i: i32, rng: &mut ChaCha20Rng) -> Layer {
         let c_ai: AI = AI::new(creature.get_id(), Behavior::Wandering, Behavior::Inactive);
 
         let item: (Item, Effect) = item_types::create_testitem(5 * i, Rarity::Common);
-        creature.inventory.replace_active(0, item.0.get_id());
+        creature.inventory.replace_item(0, item.0.get_id());
 
         layer.add_creature(creature, c_ai);
         layer.add_item(item.0, item.1);

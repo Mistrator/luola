@@ -25,8 +25,7 @@ impl Creature {
         let mut rng = rand::thread_rng();
         let id = rng.gen();
 
-        let n_active_items = stats.n_active_items.get_value(stats.level) as usize;
-        let n_passive_items = stats.n_passive_items.get_value(stats.level) as usize;
+        let inventory_slots = stats.inventory_slots.get_value(stats.level) as usize;
 
         stats.current_hp = stats.max_hp.get_value(stats.level);
 
@@ -35,7 +34,7 @@ impl Creature {
             name: name,
             position: position,
             stats: stats,
-            inventory: Inventory::new(n_active_items, n_passive_items),
+            inventory: Inventory::new(inventory_slots),
         }
     }
 

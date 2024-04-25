@@ -65,17 +65,17 @@ pub fn is_valid(
             // todo: check that the targets are of the right type for the item
             // todo: check that the targets fulfill the targeting constraints of the item
             let inv = &actor.inventory;
-            if !inv.valid_active_slot(u.inventory_slot) {
+            if !inv.valid_slot(u.inventory_slot) {
                 return Err(String::from(format!(
-                    "active item slot {} does not exist",
+                    "item slot {} does not exist",
                     u.inventory_slot
                 )));
             }
 
-            let item_id = inv.get_active(u.inventory_slot);
+            let item_id = inv.get_item(u.inventory_slot);
             if item_id.is_none() {
                 return Err(String::from(format!(
-                    "active item slot {} is empty",
+                    "item slot {} is empty",
                     u.inventory_slot
                 )));
             }
@@ -101,7 +101,7 @@ pub fn execute(action: &Action, actor_id: u128, layer: &mut Layer) {
         Action::UseItem(u) => {
             let inv = &actor.inventory;
             let item_id = inv
-                .get_active(u.inventory_slot)
+                .get_item(u.inventory_slot)
                 .expect("the slot should exist and contain an item");
 
             let effect = layer
