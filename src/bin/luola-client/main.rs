@@ -33,11 +33,9 @@ fn act(player: &mut Player, enemy: u128) {
         Message::ActionError(err) => println!("action rejected: {}", err.message),
         other => println!("received unexpected message type: {}", other),
     }*/
-
-    receive_game_state(&mut player.socket);
 }
 
-fn receive_game_state(stream: &mut TcpStream) -> Option<Layer> {
+fn receive_game_state(stream: &mut TcpStream, ui: &mut UI) -> Option<Layer> {
     let msg = luola::net::receive(stream);
 
     match msg {
@@ -47,6 +45,9 @@ fn receive_game_state(stream: &mut TcpStream) -> Option<Layer> {
             // println!("{}", layer);
 
             return Some(layer);
+        }
+        Message::Info(msg) => {
+            ui.add_message(msg);
         }
         other => {
             // println!("received unexpected message type: {}", other);
@@ -93,29 +94,17 @@ fn open_stream() -> TcpStream {
     stream
 }
 
-fn play(player: &mut Player, enemy: u128) {
-    loop {
-        let delay = time::Duration::from_millis(1000);
-
-        thread::sleep(delay);
-        act(player, enemy);
-
-        thread::sleep(delay);
-        act(player, enemy);
-
-        for _ in 0..4 {
-            receive_game_state(&mut player.socket);
-            receive_game_state(&mut player.socket);
-        }
-    }
-}
-
 fn main() {
     let mut stream = open_stream();
     let player_id = join(&mut stream);
 
+    let width: usize = 162;
+    let height: usize = 48;
+    let mut terminal = Terminal::init(width, height);
+    let mut ui = UI::new(width, height);
+
     let mut player = Player::build_existing(stream, player_id);
-    let layer = receive_game_state(&mut player.socket).unwrap();
+    let layer = receive_game_state(&mut player.socket, &mut ui).unwrap();
 
     let mut enemy_id: u128 = 0;
     for (id, _) in layer.creatures {
@@ -123,31 +112,26 @@ fn main() {
             enemy_id = id;
         }
     }
-
-    let width: usize = 160;
-    let height: usize = 48;
-    let mut terminal = Terminal::init(width, height);
-    let mut ui = UI::new(width, height);
     ui.select_creature(enemy_id);
-
-    // play(&mut player, enemy_id);
 
     loop {
         let delay = time::Duration::from_millis(1000);
 
         thread::sleep(delay);
         act(&mut player, enemy_id);
+        receive_game_state(&mut player.socket, &mut ui);
 
         thread::sleep(delay);
         act(&mut player, enemy_id);
+        receive_game_state(&mut player.socket, &mut ui);
 
         for _ in 0..4 {
-            receive_game_state(&mut player.socket);
-            let layer = receive_game_state(&mut player.socket).unwrap();
-
-            let rendered_ui = ui.render(&layer);
-            terminal.next_frame.paste(&rendered_ui, 0, 0);
-            terminal.render_next();
+            receive_game_state(&mut player.socket, &mut ui);
+            if let Some(layer) = receive_game_state(&mut player.socket, &mut ui) {
+                let rendered_ui = ui.render(&layer);
+                terminal.next_frame.paste(&rendered_ui, 0, 0);
+                terminal.render_next();
+            }
         }
     }
 }

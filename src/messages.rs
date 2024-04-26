@@ -1,6 +1,7 @@
 use crate::creature::action::Action;
 use crate::creature::Creature;
 use crate::grid::Grid;
+use crate::info_message::MessageType;
 use crate::item::Item;
 use crate::world::Layer;
 use serde::{Deserialize, Serialize};
@@ -26,9 +27,10 @@ pub enum Message {
     JoinOk(JoinOkMsg),
     JoinError(ErrorMsg),
     GameState(GameStateMsg),
+    Info(MessageType),
     Act(Action),
     ActionOk,
-    ActionError(ErrorMsg),
+    ActionError,
 }
 
 impl fmt::Display for Message {
@@ -38,9 +40,10 @@ impl fmt::Display for Message {
             Message::JoinOk(_) => "JoinOk",
             Message::JoinError(_) => "JoinError",
             Message::GameState(_) => "GameState",
+            Message::Info(_) => "Info",
             Message::Act(_) => "Act",
             Message::ActionOk => "ActionOk",
-            Message::ActionError(_) => "ActionError",
+            Message::ActionError => "ActionError",
         };
 
         write!(f, "{}", variant)

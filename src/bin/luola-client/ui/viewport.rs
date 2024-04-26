@@ -20,6 +20,14 @@ pub struct Viewport {
 
 impl Viewport {
     pub fn new(width: usize, height: usize) -> Self {
+        if width % TILE_WIDTH != 0 {
+            panic!("viewport width must be a multiple of tile width");
+        }
+
+        if height % TILE_HEIGHT != 0 {
+            panic!("viewport height must be a multiple of tile height");
+        }
+
         let width_squares = width / TILE_WIDTH;
         let height_squares = height / TILE_HEIGHT;
 

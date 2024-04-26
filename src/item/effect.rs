@@ -1,3 +1,4 @@
+use crate::info_message::MessageType;
 use crate::item::statistics::Statistics;
 use crate::item::targeting::Target;
 use crate::world::Layer;
@@ -37,14 +38,21 @@ impl OngoingEffect {
     }
 }
 
+pub struct EffectResult {
+    pub ongoing_effect: Option<OngoingEffect>,
+    pub message: MessageType,
+}
+
 pub struct Effect {
     pub duration: Duration,
     pub stats: Statistics,
 
     #[rustfmt::skip]
-    pub apply: fn(effect: u128, owner: u128, target: Target, layer: &mut Layer) -> Option<OngoingEffect>,
-    pub tick: Option<fn(effect: u128, owner: u128, target: &Target, layer: &mut Layer)>,
-    pub remove: Option<fn(effect: u128, owner: u128, target: &Target, layer: &mut Layer)>,
+    pub apply: fn(effect: u128, owner: u128, target: Target, layer: &mut Layer) -> EffectResult,
+    #[rustfmt::skip]
+    pub tick: Option<fn(effect: u128, owner: u128, target: &Target, layer: &mut Layer) -> MessageType>,
+    #[rustfmt::skip]
+    pub remove: Option<fn(effect: u128, owner: u128, target: &Target, layer: &mut Layer) -> MessageType>,
 
     id: u128,
 }
@@ -55,9 +63,9 @@ impl Effect {
         duration: Duration,
         stats: Statistics,
 
-        apply: fn(effect: u128, owner: u128, target: Target, layer: &mut Layer) -> Option<OngoingEffect>,
-        tick: Option<fn(effect: u128, owner: u128, target: &Target, layer: &mut Layer)>,
-        remove: Option<fn(effect: u128, owner: u128, target: &Target, layer: &mut Layer)>,
+        apply: fn(effect: u128, owner: u128, target: Target, layer: &mut Layer) -> EffectResult,
+        tick: Option<fn(effect: u128, owner: u128, target: &Target, layer: &mut Layer) -> MessageType>,
+        remove: Option<fn(effect: u128, owner: u128, target: &Target, layer: &mut Layer) -> MessageType>,
     ) -> Self {
         let mut rng = rand::thread_rng();
         let id = rng.gen();

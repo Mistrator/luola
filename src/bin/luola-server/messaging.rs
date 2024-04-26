@@ -1,6 +1,7 @@
 use luola::constants;
 use luola::creature::action::{self, Action};
 use luola::creature::Creature;
+use luola::info_message::MessageType;
 use luola::messages::*;
 use luola::player::Player;
 use luola::world::Layer;
@@ -94,6 +95,13 @@ pub fn send_game_state(layer: &Layer, players: &mut HashMap<u128, Player>) {
     }
 }
 
+pub fn send_info_message(info_message: MessageType, players: &mut HashMap<u128, Player>) {
+    let message = Message::Info(info_message);
+    for (_, player) in players {
+        luola::net::send(&mut player.socket, &message);
+    }
+}
+
 pub fn get_player_action(
     player: &mut Player,
     prev_actions: &Vec<Action>,
@@ -114,13 +122,9 @@ pub fn get_player_action(
                         return player_action;
                     }
                     Err(msg) => {
-                        println!(
-                            "player {} tried to take an invalid action: {}",
-                            player.get_id(),
-                            msg
-                        );
-                        let response = ErrorMsg { message: msg };
-                        let response = Message::ActionError(response);
+                        println!("player {} tried to take an invalid action", player.get_id());
+
+                        let response = Message::ActionError;
                         luola::net::send(&mut player.socket, &response);
                     }
                 }
@@ -131,10 +135,10 @@ pub fn get_player_action(
                     other
                 );
 
-                let response = ErrorMsg {
+                /*let response = ErrorMsg {
                     message: String::from(format!("unexpected message type: {}", other)),
-                };
-                let response = Message::ActionError(response);
+                };*/
+                let response = Message::ActionError;
 
                 luola::net::send(&mut player.socket, &response);
             }

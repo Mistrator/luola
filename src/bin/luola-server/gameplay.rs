@@ -40,15 +40,20 @@ fn take_creature_turn(
             }
             None => {
                 let ai_action = ai::act(c_ai, layer);
-                action::is_valid(&ai_action, &prev_actions, creature, layer)
-                    .expect("AI should not take an invalid action");
+                if action::is_valid(&ai_action, &prev_actions, creature, layer).is_err() {
+                    panic!("AI should not take an invalid action");
+                }
+
                 ai_action
             }
         };
 
         println!("creature {} acts", creature.get_id());
 
-        action::execute(&cur_action, creature_id, layer);
+        if let Some(info_message) = action::execute(&cur_action, creature_id, layer) {
+            messaging::send_info_message(info_message, players);
+        }
+
         prev_actions.push(cur_action);
 
         Perception::update_all_observations(

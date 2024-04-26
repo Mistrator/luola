@@ -3,6 +3,7 @@ pub mod check;
 pub mod constants;
 pub mod creature;
 pub mod grid;
+pub mod info_message;
 pub mod initiative;
 pub mod item;
 pub mod messages;

@@ -23,8 +23,6 @@ impl CreatureInfo {
         let creature_id = creature_id.unwrap();
         let creature = layer.creatures.get(&creature_id).unwrap();
 
-        let bullet_point = "\u{25ba}";
-
         canvas.write(creature.name.clone(), color_scheme::TEXT_HIGHLIGHT_STYLE);
         canvas.write(
             format!(" (Level {})", creature.stats.level),
@@ -56,7 +54,7 @@ impl CreatureInfo {
         canvas.write(String::from("Attacks"), color_scheme::TEXT_HIGHLIGHT_STYLE);
         canvas.write_newline();
         canvas.write(
-            format!("{} Melee ", bullet_point),
+            format!("{} Melee ", color_scheme::BULLET_POINT),
             color_scheme::TEXT_HIGHLIGHT_STYLE,
         );
         write_bonus_stat(
@@ -66,7 +64,7 @@ impl CreatureInfo {
         );
         canvas.write_newline();
         canvas.write(
-            format!("{} Ranged ", bullet_point),
+            format!("{} Ranged ", color_scheme::BULLET_POINT),
             color_scheme::TEXT_HIGHLIGHT_STYLE,
         );
         write_bonus_stat(
@@ -76,7 +74,7 @@ impl CreatureInfo {
         );
         canvas.write_newline();
         canvas.write(
-            format!("{} Magic ", bullet_point),
+            format!("{} Magic ", color_scheme::BULLET_POINT),
             color_scheme::TEXT_HIGHLIGHT_STYLE,
         );
         write_bonus_stat(
@@ -90,7 +88,7 @@ impl CreatureInfo {
         canvas.write(String::from("Defenses"), color_scheme::TEXT_HIGHLIGHT_STYLE);
         canvas.write_newline();
         canvas.write(
-            format!("{} Armor ", bullet_point),
+            format!("{} Armor ", color_scheme::BULLET_POINT),
             color_scheme::TEXT_HIGHLIGHT_STYLE,
         );
         write_value_stat(
@@ -100,7 +98,7 @@ impl CreatureInfo {
         );
         canvas.write_newline();
         canvas.write(
-            format!("{} Fortitude ", bullet_point),
+            format!("{} Fortitude ", color_scheme::BULLET_POINT),
             color_scheme::TEXT_HIGHLIGHT_STYLE,
         );
         write_value_stat(
@@ -110,13 +108,13 @@ impl CreatureInfo {
         );
         canvas.write_newline();
         canvas.write(
-            format!("{} Reflex ", bullet_point),
+            format!("{} Reflex ", color_scheme::BULLET_POINT),
             color_scheme::TEXT_HIGHLIGHT_STYLE,
         );
         write_value_stat(&mut canvas, &creature.stats.reflex_dc, creature.stats.level);
         canvas.write_newline();
         canvas.write(
-            format!("{} Will ", bullet_point),
+            format!("{} Will ", color_scheme::BULLET_POINT),
             color_scheme::TEXT_HIGHLIGHT_STYLE,
         );
         write_value_stat(&mut canvas, &creature.stats.will_dc, creature.stats.level);
@@ -126,7 +124,7 @@ impl CreatureInfo {
         canvas.write(String::from("Other"), color_scheme::TEXT_HIGHLIGHT_STYLE);
         canvas.write_newline();
         canvas.write(
-            format!("{} Speed ", bullet_point),
+            format!("{} Speed ", color_scheme::BULLET_POINT),
             color_scheme::TEXT_HIGHLIGHT_STYLE,
         );
         write_value_stat(
@@ -136,7 +134,7 @@ impl CreatureInfo {
         );
         canvas.write_newline();
         canvas.write(
-            format!("{} Initiative ", bullet_point),
+            format!("{} Initiative ", color_scheme::BULLET_POINT),
             color_scheme::TEXT_HIGHLIGHT_STYLE,
         );
         write_bonus_stat(
@@ -146,7 +144,7 @@ impl CreatureInfo {
         );
         canvas.write_newline();
         canvas.write(
-            format!("{} Actions ", bullet_point),
+            format!("{} Actions ", color_scheme::BULLET_POINT),
             color_scheme::TEXT_HIGHLIGHT_STYLE,
         );
         write_value_stat(&mut canvas, &creature.stats.n_actions, creature.stats.level);

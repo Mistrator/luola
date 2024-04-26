@@ -1,5 +1,6 @@
 use crate::check::{self, Outcome};
-use crate::item::effect::{Duration, Effect, OngoingEffect};
+use crate::info_message::{AttackMessage, AttackResult, MessageType};
+use crate::item::effect::{Duration, Effect, EffectResult};
 use crate::item::statistics::{self, Rarity, Statistics};
 use crate::item::targeting::Target;
 use crate::stat::Proficiency;
@@ -17,13 +18,15 @@ pub fn create_testeffect(level: i32, rarity: Rarity) -> Effect {
 }
 
 pub fn basic_melee_attack(
-    effect: u128,
+    effect_id: u128,
     owner: u128,
     target: Target,
     layer: &mut Layer,
-) -> Option<OngoingEffect> {
-    let effect = layer.effects.get(&effect).unwrap();
+) -> EffectResult {
+    let effect = layer.effects.get(&effect_id).unwrap();
     let item_damage = effect.get_stat_value("damage");
+
+    let mut results: Vec<AttackResult> = Vec::new();
 
     match target {
         Target::Creatures(creatures) => {
@@ -43,10 +46,28 @@ pub fn basic_melee_attack(
 
                 let defender = layer.creatures.get_mut(&c).unwrap();
                 defender.change_hp(-attack_damage);
+
+                let result = AttackResult {
+                    target: c,
+                    check,
+                    damage: attack_damage,
+                };
+
+                results.push(result);
             }
         }
         _ => panic!("effect can only target creatures"),
     }
 
-    None
+    // item and its effect have the same id
+    let message = AttackMessage {
+        attacker: owner,
+        item: effect_id,
+        results,
+    };
+
+    EffectResult {
+        ongoing_effect: None,
+        message: MessageType::Attack(message),
+    }
 }

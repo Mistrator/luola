@@ -1,6 +1,7 @@
 use crate::creature::Creature;
 use crate::grid::gridalgos;
 use crate::grid::GridSquare;
+use crate::info_message::MessageType;
 use crate::item::targeting::Target;
 use crate::world::Layer;
 use serde::{Deserialize, Serialize};
@@ -28,7 +29,7 @@ pub fn is_valid(
     _prev_actions: &Vec<Action>,
     actor: &Creature,
     layer: &Layer,
-) -> Result<(), String> {
+) -> Result<(), MessageType> {
     match action {
         Action::Idle => Ok(()),
         Action::Move(m) => {
@@ -36,11 +37,15 @@ pub fn is_valid(
             let movement_speed = actor.stats.movement_speed.get_value(actor.stats.level);
 
             if !layer.grid.valid_square(m.destination) {
-                return Err(String::from("move destination square is outside the grid"));
+                return Err(MessageType::Error(String::from(
+                    "Move destination square is outside the grid",
+                )));
             }
 
             if !layer.grid.free_square(m.destination) {
-                return Err(String::from("move destination square is not empty"));
+                return Err(MessageType::Error(String::from(
+                    "Move destination square is not empty",
+                )));
             }
 
             #[rustfmt::skip]
@@ -53,9 +58,9 @@ pub fn is_valid(
             let shortest_path = gridalgos::get_shortest_path(&all_paths, m.destination);
 
             if shortest_path.is_none() {
-                return Err(String::from(
-                    "move destination square not reachable or too far away",
-                ));
+                return Err(MessageType::Error(String::from(
+                    "Move destination square is unreachable or too far away",
+                )));
             }
 
             Ok(())
@@ -66,16 +71,16 @@ pub fn is_valid(
             // todo: check that the targets fulfill the targeting constraints of the item
             let inv = &actor.inventory;
             if !inv.valid_slot(u.inventory_slot) {
-                return Err(String::from(format!(
-                    "item slot {} does not exist",
+                return Err(MessageType::Error(format!(
+                    "Inventory slot {} does not exist",
                     u.inventory_slot
                 )));
             }
 
             let item_id = inv.get_item(u.inventory_slot);
             if item_id.is_none() {
-                return Err(String::from(format!(
-                    "item slot {} is empty",
+                return Err(MessageType::Error(format!(
+                    "Inventory slot {} is empty",
                     u.inventory_slot
                 )));
             }
@@ -85,18 +90,19 @@ pub fn is_valid(
     }
 }
 
-pub fn execute(action: &Action, actor_id: u128, layer: &mut Layer) {
+pub fn execute(action: &Action, actor_id: u128, layer: &mut Layer) -> Option<MessageType> {
     let actor = layer
         .creatures
         .get_mut(&actor_id)
         .expect("actor should be a valid creature");
 
     match action {
-        Action::Idle => return,
+        Action::Idle => return None,
         Action::Move(m) => {
             println!("position before move: {}", actor.get_position());
             actor.set_position(&m.destination);
             println!("position after move: {}", actor.get_position());
+            return None;
         }
         Action::UseItem(u) => {
             let inv = &actor.inventory;
@@ -109,10 +115,13 @@ pub fn execute(action: &Action, actor_id: u128, layer: &mut Layer) {
                 .get(&item_id)
                 .expect("an item should have an effect");
 
-            let ongoing_effect = (effect.apply)(item_id, actor_id, u.target.clone(), layer);
-            if let Some(e) = ongoing_effect {
+            let effect_result = (effect.apply)(item_id, actor_id, u.target.clone(), layer);
+
+            if let Some(e) = effect_result.ongoing_effect {
                 layer.ongoing_effects.insert(e.get_id(), e);
             }
+
+            return Some(effect_result.message);
         }
     }
 }

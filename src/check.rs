@@ -1,6 +1,8 @@
 use crate::creature::statistics::Statistics;
 use rand::prelude::*;
+use serde::{Deserialize, Serialize};
 
+#[derive(Deserialize, Serialize)]
 pub enum Outcome {
     CriticalSuccess,
     Success,
@@ -8,6 +10,7 @@ pub enum Outcome {
     CriticalFailure,
 }
 
+#[derive(Deserialize, Serialize)]
 pub struct Check {
     pub roll: i32,
     pub modifier: i32,

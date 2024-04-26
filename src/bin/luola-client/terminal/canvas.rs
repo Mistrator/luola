@@ -38,6 +38,10 @@ impl Canvas {
         self.height
     }
 
+    pub fn get_cursor_row(&self) -> usize {
+        self.cursor_row
+    }
+
     pub fn set_cursor_position(&mut self, row: usize, column: usize) {
         self.cursor_row = row;
         self.cursor_column = column;
@@ -78,6 +82,27 @@ impl Canvas {
 
         for (i, content_row) in other.content.iter().enumerate() {
             for (j, c) in content_row.iter().enumerate() {
+                let current_c = self.content[row + i][column + j];
+                let pasted_c = *c;
+
+                let merged_c = StyledChar::merge(pasted_c, current_c);
+
+                self.content[row + i][column + j] = merged_c;
+            }
+        }
+    }
+
+    pub fn paste_intersection(&mut self, other: &Canvas, row: usize, column: usize) {
+        for (i, content_row) in other.content.iter().enumerate() {
+            for (j, c) in content_row.iter().enumerate() {
+                if row + i >= self.height {
+                    continue;
+                }
+
+                if column + j >= self.width {
+                    continue;
+                }
+
                 let current_c = self.content[row + i][column + j];
                 let pasted_c = *c;
 

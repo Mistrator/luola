@@ -1,13 +1,16 @@
 use crate::terminal::canvas::Canvas;
 use crate::ui::creature_info::CreatureInfo;
 use crate::ui::inventory_info::InventoryInfo;
+use crate::ui::message_log::MessageLog;
 use crate::ui::viewport::Viewport;
+use luola::info_message::MessageType;
 use luola::world::Layer;
 
 mod borders;
 mod color_scheme;
 mod creature_info;
 mod inventory_info;
+mod message_log;
 mod viewport;
 
 pub struct UI {
@@ -18,6 +21,7 @@ pub struct UI {
     viewport: Viewport,
     creature_info: CreatureInfo,
     inventory_info: InventoryInfo,
+    message_log: MessageLog,
 
     selected_creature: Option<u128>,
 }
@@ -26,6 +30,8 @@ impl UI {
     pub fn new(width: usize, height: usize) -> Self {
         let sidebar_width = 32;
         let viewport_width = width - sidebar_width;
+        let viewport_height = height / 4 * 3;
+        let message_log_height = height - viewport_height;
 
         let mut inventory_info = InventoryInfo::new(sidebar_width - 2, height / 2 - 2);
         inventory_info.select_slot(0);
@@ -35,15 +41,16 @@ impl UI {
             height,
             sidebar_width,
 
-            viewport: Viewport::new(viewport_width - 2, height - 2),
+            viewport: Viewport::new(viewport_width - 2, viewport_height - 2),
             creature_info: CreatureInfo::new(sidebar_width - 2, height / 2 - 2),
             inventory_info,
+            message_log: MessageLog::new(viewport_width - 2, message_log_height - 2),
 
             selected_creature: None,
         }
     }
 
-    pub fn render(&self, layer: &Layer) -> Canvas {
+    pub fn render(&mut self, layer: &Layer) -> Canvas {
         let mut canvas = Canvas::new(self.width, self.height);
 
         let viewport = self.viewport.render(layer);
@@ -64,6 +71,10 @@ impl UI {
             viewport.get_width(),
         );
 
+        let message_log = self.message_log.render(layer);
+        let message_log = borders::add_rounded_borders(&message_log, color_scheme::BORDER_STYLE);
+        canvas.paste(&message_log, viewport.get_height(), 0);
+
         canvas
     }
 
@@ -73,5 +84,9 @@ impl UI {
 
     pub fn deselect_creature(&mut self) {
         self.selected_creature = None;
+    }
+
+    pub fn add_message(&mut self, message: MessageType) {
+        self.message_log.add_message(message);
     }
 }
