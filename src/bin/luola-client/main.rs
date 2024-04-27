@@ -115,10 +115,12 @@ fn main() {
     }
     ui.select_creature(enemy_id);
 
-    loop {
-        let delay = time::Duration::from_millis(1000);
+    let input_rx = input::spawn_polling_thread();
 
-        input::handle_input(&mut ui);
+    loop {
+        let delay = time::Duration::from_millis(100);
+
+        input::handle_input(&input_rx, &mut ui);
 
         thread::sleep(delay);
         act(&mut player, enemy_id);

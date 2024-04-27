@@ -1,9 +1,11 @@
 use crate::ui::UI;
 use luola::grid::GridSquare;
 use std::io::{self, ErrorKind, Read};
+use std::sync::mpsc::{self, Receiver, TryRecvError};
+use std::thread;
 
 #[derive(Eq, Ord, PartialEq, PartialOrd)]
-enum Direction {
+pub enum Direction {
     Up,
     Down,
     Left,
@@ -11,14 +13,28 @@ enum Direction {
 }
 
 #[derive(Eq, Ord, PartialEq, PartialOrd)]
-enum InputEvent {
+pub enum InputEvent {
     Move(Direction),
     UseItem,
     SelectInventorySlot(usize),
 }
 
-pub fn handle_input(ui: &mut UI) {
-    let input_events = poll_input();
+pub fn handle_input(input_rx: &Receiver<InputEvent>, ui: &mut UI) {
+    let mut input_events: Vec<InputEvent> = Vec::new();
+
+    // We could just iterate over try_iter() but it does not allow us to distinguish
+    // between running out of values and sender failure
+    loop {
+        match input_rx.try_recv() {
+            Ok(event) => input_events.push(event),
+            Err(e) => match e {
+                TryRecvError::Empty => break,
+                TryRecvError::Disconnected => {
+                    panic!("failed to receive input event: sender has been disconnected")
+                }
+            },
+        }
+    }
 
     for event in input_events {
         match event {
@@ -38,6 +54,20 @@ pub fn handle_input(ui: &mut UI) {
             }
         }
     }
+}
+
+pub fn spawn_polling_thread() -> Receiver<InputEvent> {
+    let (tx, rx) = mpsc::channel();
+
+    thread::spawn(move || loop {
+        let input_events = poll_input();
+        for event in input_events {
+            tx.send(event)
+                .expect("failed to send input event: receiver has been deallocated");
+        }
+    });
+
+    rx
 }
 
 fn poll_input() -> Vec<InputEvent> {
