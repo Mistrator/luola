@@ -12,6 +12,7 @@ use luola::world::Layer;
 use std::net::TcpStream;
 use std::{thread, time};
 
+mod input;
 mod terminal;
 mod ui;
 
@@ -116,6 +117,8 @@ fn main() {
 
     loop {
         let delay = time::Duration::from_millis(1000);
+
+        input::handle_input(&mut ui);
 
         thread::sleep(delay);
         act(&mut player, enemy_id);

@@ -18,9 +18,9 @@ pub struct UI {
     height: usize,
     sidebar_width: usize,
 
-    viewport: Viewport,
+    pub viewport: Viewport,
     creature_info: CreatureInfo,
-    inventory_info: InventoryInfo,
+    pub inventory_info: InventoryInfo,
     message_log: MessageLog,
 
     selected_creature: Option<u128>,
