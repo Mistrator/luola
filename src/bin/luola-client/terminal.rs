@@ -32,6 +32,7 @@ impl Terminal {
 
         println!("{}", ansi_sequences::use_alternate_screen_buffer());
         println!("{}", ansi_sequences::clear_screen());
+        println!("{}", ansi_sequences::hide_cursor());
 
         Self {
             width,
@@ -64,6 +65,7 @@ impl Terminal {
 
 impl Drop for Terminal {
     fn drop(&mut self) {
+        println!("{}", ansi_sequences::show_cursor());
         println!("{}", ansi_sequences::clear_screen());
         println!("{}", ansi_sequences::use_main_screen_buffer());
 

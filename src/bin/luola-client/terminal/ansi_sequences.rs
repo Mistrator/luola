@@ -22,6 +22,14 @@ pub fn set_cursor_position(row: usize, column: usize) -> String {
     format!("{}{};{}H", prefix(), row, column)
 }
 
+pub fn hide_cursor() -> String {
+    format!("{}?25l", prefix())
+}
+
+pub fn show_cursor() -> String {
+    format!("{}?25h", prefix())
+}
+
 fn format_text(sgr: String) -> String {
     format!("{}{}m", prefix(), sgr)
 }
