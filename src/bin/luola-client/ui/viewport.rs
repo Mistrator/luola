@@ -95,6 +95,10 @@ impl Viewport {
         }
     }
 
+    pub fn get_selected_world_square(&self) -> GridSquare {
+        self.viewport_to_world(self.selection)
+    }
+
     fn width_chars(&self) -> usize {
         TILE_WIDTH * self.width_squares
     }

@@ -1,7 +1,8 @@
-use crate::ui::UI;
-use luola::grid::GridSquare;
+use crate::actions;
+use crate::GameState;
+use luola::messages::Message;
 use std::io::{self, ErrorKind, Read};
-use std::sync::mpsc::{self, Receiver, TryRecvError};
+use std::sync::mpsc::{self, Receiver, Sender, TryRecvError};
 use std::thread;
 
 #[derive(Eq, Ord, PartialEq, PartialOrd)]
@@ -19,7 +20,11 @@ pub enum InputEvent {
     SelectInventorySlot(usize),
 }
 
-pub fn handle_input(input_rx: &Receiver<InputEvent>, ui: &mut UI) {
+pub fn handle_input(
+    input_rx: &Receiver<InputEvent>,
+    outgoing_tx: &Sender<Message>,
+    state: &mut GameState,
+) {
     let mut input_events: Vec<InputEvent> = Vec::new();
 
     // We could just iterate over try_iter() but it does not allow us to distinguish
@@ -38,20 +43,11 @@ pub fn handle_input(input_rx: &Receiver<InputEvent>, ui: &mut UI) {
 
     for event in input_events {
         match event {
-            InputEvent::Move(direction) => {
-                let delta = match direction {
-                    Direction::Up => GridSquare { y: -1, x: 0 },
-                    Direction::Down => GridSquare { y: 1, x: 0 },
-                    Direction::Left => GridSquare { y: 0, x: -1 },
-                    Direction::Right => GridSquare { y: 0, x: 1 },
-                };
-
-                ui.viewport.move_selection(delta);
-            }
-            InputEvent::UseItem => (),
+            InputEvent::Move(direction) => actions::move_selection(direction, &mut state.ui),
             InputEvent::SelectInventorySlot(slot) => {
-                ui.inventory_info.select_slot(slot);
+                actions::select_inventory_slot(slot, &mut state.ui)
             }
+            InputEvent::UseItem => actions::use_item(outgoing_tx, state),
         }
     }
 }
@@ -62,8 +58,9 @@ pub fn spawn_polling_thread() -> Receiver<InputEvent> {
     thread::spawn(move || loop {
         let input_events = poll_input();
         for event in input_events {
-            tx.send(event)
-                .expect("failed to send input event: receiver has been deallocated");
+            tx.send(event).expect(
+                "failed to send input event: receiver has disconnected, did the main thread panic?",
+            );
         }
     });
 

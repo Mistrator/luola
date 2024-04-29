@@ -3,7 +3,6 @@ use crate::ui::creature_info::CreatureInfo;
 use crate::ui::inventory_info::InventoryInfo;
 use crate::ui::message_log::MessageLog;
 use crate::ui::viewport::Viewport;
-use luola::info_message::MessageType;
 use luola::world::Layer;
 
 mod borders;
@@ -21,9 +20,9 @@ pub struct UI {
     pub viewport: Viewport,
     creature_info: CreatureInfo,
     pub inventory_info: InventoryInfo,
-    message_log: MessageLog,
+    pub message_log: MessageLog,
 
-    selected_creature: Option<u128>,
+    pub selected_creature: Option<u128>,
 }
 
 impl UI {
@@ -84,9 +83,5 @@ impl UI {
 
     pub fn deselect_creature(&mut self) {
         self.selected_creature = None;
-    }
-
-    pub fn add_message(&mut self, message: MessageType) {
-        self.message_log.add_message(message);
     }
 }

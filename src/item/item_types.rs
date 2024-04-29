@@ -8,10 +8,10 @@ pub fn create_testitem(level: i32, rarity: Rarity) -> (Item, Effect) {
     let name = String::from("testitem");
     let description = String::from("A fancy description");
 
-    let target = TargetKind::Area(AreaKind::Burst(BurstParams {
+    let target = TargetKind::Burst(BurstParams {
         range: 10,
-        radius: 4,
-    }));
+        radius: 2,
+    });
 
     let kind = ItemKind::Active(target);
     let effect = create_testeffect(level, rarity);

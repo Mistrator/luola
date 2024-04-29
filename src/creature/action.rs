@@ -2,7 +2,6 @@ use crate::creature::Creature;
 use crate::grid::gridalgos;
 use crate::grid::GridSquare;
 use crate::info_message::MessageType;
-use crate::item::targeting::Target;
 use crate::world::Layer;
 use serde::{Deserialize, Serialize};
 
@@ -21,7 +20,7 @@ pub struct MoveAction {
 #[derive(Deserialize, Serialize)]
 pub struct UseItemAction {
     pub inventory_slot: usize,
-    pub target: Target,
+    pub target: GridSquare,
 }
 
 pub fn is_valid(

@@ -21,6 +21,10 @@ impl Inventory {
     }
 
     pub fn get_item(&self, slot: usize) -> Option<u128> {
+        if !self.valid_slot(slot) {
+            return None;
+        }
+
         self.items[slot]
     }
 

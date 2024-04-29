@@ -1,6 +1,6 @@
 use crate::ai::AI;
 use crate::creature::Creature;
-use crate::grid::Grid;
+use crate::grid::{Grid, GridSquare};
 use crate::item::effect::{Effect, OngoingEffect};
 use crate::item::Item;
 use std::collections::HashMap;
@@ -68,6 +68,18 @@ impl Layer {
 
         self.items.insert(id, item);
         self.effects.insert(id, effect);
+    }
+
+    pub fn get_creatures_at(&self, square: GridSquare) -> Vec<u128> {
+        let mut creatures: Vec<u128> = Vec::new();
+
+        for (c_id, creature) in &self.creatures {
+            if creature.get_position() == square {
+                creatures.push(*c_id);
+            }
+        }
+
+        creatures
     }
 }
 

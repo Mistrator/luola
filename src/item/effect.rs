@@ -1,6 +1,6 @@
+use crate::grid::GridSquare;
 use crate::info_message::MessageType;
 use crate::item::statistics::Statistics;
-use crate::item::targeting::Target;
 use crate::world::Layer;
 use rand::prelude::*;
 
@@ -13,14 +13,14 @@ pub enum Duration {
 pub struct OngoingEffect {
     pub effect: u128,
     pub owner: u128,
-    pub target: Target,
+    pub target: GridSquare,
     pub remaining_duration: Duration,
 
     id: u128,
 }
 
 impl OngoingEffect {
-    pub fn new(effect: u128, owner: u128, target: Target, duration: Duration) -> Self {
+    pub fn new(effect: u128, owner: u128, target: GridSquare, duration: Duration) -> Self {
         let mut rng = rand::thread_rng();
         let id = rng.gen();
 
@@ -48,11 +48,11 @@ pub struct Effect {
     pub stats: Statistics,
 
     #[rustfmt::skip]
-    pub apply: fn(effect: u128, owner: u128, target: Target, layer: &mut Layer) -> EffectResult,
+    pub apply: fn(effect: u128, owner: u128, target: GridSquare, layer: &mut Layer) -> EffectResult,
     #[rustfmt::skip]
-    pub tick: Option<fn(effect: u128, owner: u128, target: &Target, layer: &mut Layer) -> MessageType>,
+    pub tick: Option<fn(effect: u128, owner: u128, target: GridSquare, layer: &mut Layer) -> MessageType>,
     #[rustfmt::skip]
-    pub remove: Option<fn(effect: u128, owner: u128, target: &Target, layer: &mut Layer) -> MessageType>,
+    pub remove: Option<fn(effect: u128, owner: u128, target: GridSquare, layer: &mut Layer) -> MessageType>,
 
     id: u128,
 }
@@ -63,9 +63,9 @@ impl Effect {
         duration: Duration,
         stats: Statistics,
 
-        apply: fn(effect: u128, owner: u128, target: Target, layer: &mut Layer) -> EffectResult,
-        tick: Option<fn(effect: u128, owner: u128, target: &Target, layer: &mut Layer) -> MessageType>,
-        remove: Option<fn(effect: u128, owner: u128, target: &Target, layer: &mut Layer) -> MessageType>,
+        apply: fn(effect: u128, owner: u128, target: GridSquare, layer: &mut Layer) -> EffectResult,
+        tick: Option<fn(effect: u128, owner: u128, target: GridSquare, layer: &mut Layer) -> MessageType>,
+        remove: Option<fn(effect: u128, owner: u128, target: GridSquare, layer: &mut Layer) -> MessageType>,
     ) -> Self {
         let mut rng = rand::thread_rng();
         let id = rng.gen();
