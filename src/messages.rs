@@ -92,7 +92,11 @@ impl GameStateMsg {
         let mut creature_owners: HashMap<u128, CreatureOwner> = HashMap::new();
 
         for (c_id, creature) in &layer.creatures {
-            let ai = layer.creature_ai.get(c_id).expect("every creature should have an ai component");
+            let ai = layer
+                .creature_ai
+                .get(c_id)
+                .expect("every creature should have an ai component");
+
             let player_id = ai.get_controlling_player_id();
 
             let creature_owner = match player_id {
