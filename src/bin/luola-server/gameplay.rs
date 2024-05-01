@@ -23,6 +23,8 @@ fn take_creature_turn(
     gameplay_mode: GameplayMode,
     current_round: i64,
 ) -> bool {
+    messaging::send_turn_start_message(creature_id, players);
+
     let mut prev_actions: Vec<Action> = Vec::new();
 
     // todo: take this from creature stats

@@ -1,5 +1,6 @@
 use crate::actions;
 use crate::GameState;
+use luola::info_message::MessageType;
 use luola::messages::Message;
 use std::io::{self, ErrorKind, Read};
 use std::sync::mpsc::{self, Receiver, Sender, TryRecvError};
@@ -18,6 +19,21 @@ pub enum InputEvent {
     Move(Direction),
     UseItem,
     SelectInventorySlot(usize),
+}
+
+fn allowed_to_act(state: &mut GameState) -> bool {
+    let acting_creature = match state.acting_creature {
+        Some(c) => c,
+        None => return false,
+    };
+
+    if !state.this_player_controls(acting_creature) {
+        let error_msg = MessageType::Error(String::from("Can't act: it's not your turn"));
+        state.ui.message_log.add_message(error_msg);
+        return false;
+    }
+
+    true
 }
 
 pub fn handle_input(
@@ -47,7 +63,11 @@ pub fn handle_input(
             InputEvent::SelectInventorySlot(slot) => {
                 actions::select_inventory_slot(slot, &mut state.ui)
             }
-            InputEvent::UseItem => actions::use_item(outgoing_tx, state),
+            InputEvent::UseItem => {
+                if allowed_to_act(state) {
+                    actions::use_item(outgoing_tx, state);
+                }
+            }
         }
     }
 }

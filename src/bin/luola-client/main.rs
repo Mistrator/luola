@@ -1,7 +1,9 @@
 use crate::terminal::Terminal;
 use crate::ui::UI;
 use luola::constants;
+use luola::messages::CreatureOwner;
 use luola::world::Layer;
+use std::collections::HashMap;
 use std::{thread, time};
 
 mod actions;
@@ -13,7 +15,27 @@ mod ui;
 pub struct GameState {
     layer: Layer,
     ui: UI,
+    creature_owners: HashMap<u128, CreatureOwner>,
     acting_creature: Option<u128>,
+    player_id: u128,
+}
+
+impl GameState {
+    pub fn this_player_controls(&self, creature_id: u128) -> bool {
+        let owner = self.creature_owners.get(&creature_id).unwrap();
+        match owner {
+            CreatureOwner::Player(owner_id) => *owner_id == self.player_id,
+            CreatureOwner::AI => false,
+        }
+    }
+
+    pub fn some_player_controls(&self, creature_id: u128) -> bool {
+        let owner = self.creature_owners.get(&creature_id).unwrap();
+        match owner {
+            CreatureOwner::Player(_) => true,
+            CreatureOwner::AI => false,
+        }
+    }
 }
 
 fn main() {
@@ -38,7 +60,9 @@ fn main() {
     let mut state = GameState {
         layer,
         ui,
+        creature_owners: HashMap::new(),
         acting_creature: None,
+        player_id,
     };
 
     loop {

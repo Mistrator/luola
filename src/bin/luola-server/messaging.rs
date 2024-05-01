@@ -95,6 +95,16 @@ pub fn send_game_state(layer: &Layer, players: &mut HashMap<u128, Player>) {
     }
 }
 
+pub fn send_turn_start_message(acting_creature: u128, players: &mut HashMap<u128, Player>) {
+    let message = TurnStartMsg {
+        acting_creature,
+    };
+    let message = Message::TurnStart(message);
+    for (_, player) in players {
+        luola::net::send(&mut player.socket, &message);
+    }
+}
+
 pub fn send_info_message(info_message: MessageType, players: &mut HashMap<u128, Player>) {
     let message = Message::Info(info_message);
     for (_, player) in players {

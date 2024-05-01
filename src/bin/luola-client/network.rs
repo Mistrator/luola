@@ -1,5 +1,6 @@
 use crate::GameState;
 use luola::constants;
+use luola::info_message::MessageType;
 use luola::messages::*;
 use luola::world::Layer;
 use std::net::TcpStream;
@@ -62,9 +63,17 @@ fn handle_rx_message(message: Message, outgoing_tx: &Sender<Message>, state: &mu
         Message::GameState(game_state) => {
             let layer = Layer::reconstruct(game_state.grid, game_state.creatures, game_state.items);
             state.layer = layer;
+            state.creature_owners = game_state.creature_owners;
         }
         Message::Info(msg) => {
             state.ui.message_log.add_message(msg);
+        }
+        Message::TurnStart(msg) => {
+            let creature = state.layer.creatures.get(&msg.acting_creature).unwrap();
+            let info_msg = MessageType::Info(format!("Turn of {} starts", creature.name));
+            state.ui.message_log.add_message(info_msg);
+
+            state.acting_creature = Some(msg.acting_creature);
         }
         Message::ActionOk => (),
         Message::ActionError => (),
