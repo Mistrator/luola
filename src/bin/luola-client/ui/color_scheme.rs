@@ -86,4 +86,24 @@ pub const CRITICAL_FAILURE_STYLE: Style = Style {
     background_color: WIDGET_BACKGROUND_COLOR,
 };
 
+pub const PLAYER_CREATURE_STYLE: Style = Style {
+    foreground_color: Color::Blue,
+    background_color: WORLD_BACKGROUND_COLOR,
+};
+
+pub const NONPLAYER_CREATURE_STYLE: Style = Style {
+    foreground_color: Color::Red,
+    background_color: WORLD_BACKGROUND_COLOR,
+};
+
+pub const ACTIVE_PLAYER_CREATURE_STYLE: Style = Style {
+    foreground_color: Color::BrightBlue,
+    background_color: WORLD_BACKGROUND_COLOR,
+};
+
+pub const ACTIVE_NONPLAYER_CREATURE_STYLE: Style = Style {
+    foreground_color: Color::BrightRed,
+    background_color: WORLD_BACKGROUND_COLOR,
+};
+
 pub const BULLET_POINT: &str = "\u{25ba}";

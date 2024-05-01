@@ -1,10 +1,8 @@
 use crate::terminal::canvas::Canvas;
-use crate::terminal::color::Color;
-use crate::terminal::styled_char::Style;
 use crate::ui::color_scheme;
+use crate::GameState;
 use luola::creature::Creature;
 use luola::grid::{Grid, GridSquare, Tile};
-use luola::world::Layer;
 use std::collections::HashMap;
 
 const TILE_WIDTH: usize = 2 * TILE_HEIGHT;
@@ -43,10 +41,10 @@ impl Viewport {
         }
     }
 
-    pub fn render(&self, layer: &Layer) -> Canvas {
-        let mut grid = self.render_grid(&layer.grid);
+    pub fn render(&self, state: &GameState) -> Canvas {
+        let mut grid = self.render_grid(&state.layer.grid);
 
-        let creatures = self.render_creatures(&layer.creatures);
+        let creatures = self.render_creatures(&state.layer.creatures, state);
         grid.paste(&creatures, 0, 0);
 
         let selection = self.render_selection();
@@ -148,10 +146,10 @@ impl Viewport {
         }
     }
 
-    fn render_creatures(&self, creatures: &HashMap<u128, Creature>) -> Canvas {
+    fn render_creatures(&self, creatures: &HashMap<u128, Creature>, state: &GameState) -> Canvas {
         let mut canvas = Canvas::new_transparent(self.width_chars(), self.height_chars());
 
-        for (_, creature) in creatures {
+        for (c_id, creature) in creatures {
             let world_square = creature.get_position();
             let viewport_square = self.world_to_viewport(world_square);
 
@@ -160,7 +158,7 @@ impl Viewport {
             }
 
             let viewport_square = viewport_square.unwrap();
-            let rendered_creature = self.render_creature(&creature);
+            let rendered_creature = self.render_creature(*c_id, state);
 
             let square_y = viewport_square.y as usize;
             let square_x = viewport_square.x as usize;
@@ -175,12 +173,23 @@ impl Viewport {
         canvas
     }
 
-    fn render_creature(&self, _creature: &Creature) -> Canvas {
+    fn render_creature(&self, creature: u128, state: &GameState) -> Canvas {
         let mut canvas = Canvas::new_transparent(TILE_WIDTH, TILE_HEIGHT);
 
-        let style = Style {
-            foreground_color: Color::Red,
-            background_color: Color::Transparent,
+        let is_some_player = state.some_player_controls(creature);
+
+        let style = if state.acting_creature.is_some_and(|c| c == creature) {
+            if is_some_player {
+                color_scheme::ACTIVE_PLAYER_CREATURE_STYLE
+            } else {
+                color_scheme::ACTIVE_NONPLAYER_CREATURE_STYLE
+            }
+        } else {
+            if is_some_player {
+                color_scheme::PLAYER_CREATURE_STYLE
+            } else {
+                color_scheme::NONPLAYER_CREATURE_STYLE
+            }
         };
 
         canvas.set_cursor_position(1, 1);

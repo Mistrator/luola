@@ -70,7 +70,7 @@ fn main() {
 
         network::handle_messaging(&incoming_rx, &outgoing_tx, &mut state);
 
-        let rendered_ui = state.ui.render(&state.layer);
+        let rendered_ui = UI::render(&mut state);
         terminal.next_frame.paste(&rendered_ui, 0, 0);
         terminal.render_next();
 

@@ -3,7 +3,7 @@ use crate::ui::creature_info::CreatureInfo;
 use crate::ui::inventory_info::InventoryInfo;
 use crate::ui::message_log::MessageLog;
 use crate::ui::viewport::Viewport;
-use luola::world::Layer;
+use crate::GameState;
 
 mod borders;
 mod color_scheme;
@@ -51,23 +51,25 @@ impl UI {
         }
     }
 
-    pub fn render(&mut self, layer: &Layer) -> Canvas {
-        let mut canvas = Canvas::new(self.width, self.height);
+    pub fn render(state: &mut GameState) -> Canvas {
+        let mut canvas = Canvas::new(state.ui.width, state.ui.height);
 
-        let viewport = self.viewport.render(layer);
+        let viewport = state.ui.viewport.render(state);
         let viewport = borders::add_rounded_borders(&viewport, color_scheme::BORDER_STYLE);
         canvas.paste(&viewport, 0, 0);
 
-        let creature_info = self
+        let creature_info = state
+            .ui
             .creature_info
-            .render(self.get_displayed_creature(), layer);
+            .render(state.ui.get_displayed_creature(), &state.layer);
         let creature_info =
             borders::add_rounded_borders(&creature_info, color_scheme::BORDER_STYLE);
         canvas.paste(&creature_info, 0, viewport.get_width());
 
-        let inventory_info = self
+        let inventory_info = state
+            .ui
             .inventory_info
-            .render(self.get_displayed_creature(), layer);
+            .render(state.ui.get_displayed_creature(), &state.layer);
         let inventory_info =
             borders::add_rounded_borders(&inventory_info, color_scheme::BORDER_STYLE);
         canvas.paste(
@@ -76,7 +78,7 @@ impl UI {
             viewport.get_width(),
         );
 
-        let message_log = self.message_log.render(layer);
+        let message_log = state.ui.message_log.render(&state.layer);
         let message_log = borders::add_rounded_borders(&message_log, color_scheme::BORDER_STYLE);
         canvas.paste(&message_log, viewport.get_height(), 0);
 
