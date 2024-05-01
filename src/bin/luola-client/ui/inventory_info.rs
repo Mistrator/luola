@@ -70,7 +70,8 @@ impl InventoryInfo {
             }
         }
 
-        canvas.write(format!("[{}]: ", slot), slot_style);
+        // Inventory slots are internally 0-indexed but user-facing slots are 1-indexed
+        canvas.write(format!("[{}]: ", slot + 1), slot_style);
 
         let slot_contents = match item {
             Some(x) => x.name.clone(),

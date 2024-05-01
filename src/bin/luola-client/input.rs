@@ -114,7 +114,7 @@ fn poll_input() -> Vec<InputEvent> {
             'd' => Some(InputEvent::Move(Direction::Right)),
             'q' => Some(InputEvent::UseItem),
             '1'..='9' => {
-                let slot = ((c as u32) - ('0' as u32)) as usize;
+                let slot = ((c as u32) - ('1' as u32)) as usize;
                 Some(InputEvent::SelectInventorySlot(slot))
             }
             _ => None,
