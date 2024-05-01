@@ -64,6 +64,13 @@ impl StyledChar {
         }
     }
 
+    pub fn new_empty(style: Style) -> Self {
+        Self {
+            content: None,
+            style,
+        }
+    }
+
     pub fn new(content: char, style: Style) -> Self {
         Self {
             content: Some(content),

@@ -134,27 +134,18 @@ impl Viewport {
     }
 
     fn render_tile(&self, tile: Option<Tile>) -> Canvas {
-        let mut canvas = Canvas::new(TILE_WIDTH, TILE_HEIGHT);
-
-        let style = Style {
-            foreground_color: Color::White,
-            background_color: Color::Black,
-        };
-
         if tile.is_none() {
-            return canvas;
+            return Canvas::new_style(TILE_WIDTH, TILE_HEIGHT, color_scheme::WORLD_EMPTY_STYLE);
         }
 
         match tile.unwrap() {
             Tile::Wall => {
-                for _ in 0..TILE_WIDTH * TILE_HEIGHT {
-                    canvas.write(String::from("\u{2588}"), style);
-                }
+                Canvas::new_style(TILE_WIDTH, TILE_HEIGHT, color_scheme::WORLD_WALL_STYLE)
             }
-            _ => (),
+            Tile::Empty => {
+                Canvas::new_style(TILE_WIDTH, TILE_HEIGHT, color_scheme::WORLD_EMPTY_STYLE)
+            }
         }
-
-        canvas
     }
 
     fn render_creatures(&self, creatures: &HashMap<u128, Creature>) -> Canvas {

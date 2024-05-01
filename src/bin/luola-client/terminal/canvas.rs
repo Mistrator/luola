@@ -20,6 +20,16 @@ impl Canvas {
         }
     }
 
+    pub fn new_style(width: usize, height: usize, style: Style) -> Self {
+        Self {
+            width,
+            height,
+            content: vec![vec![StyledChar::new_empty(style); width]; height],
+            cursor_row: 0,
+            cursor_column: 0,
+        }
+    }
+
     pub fn new_transparent(width: usize, height: usize) -> Self {
         Self {
             width,
