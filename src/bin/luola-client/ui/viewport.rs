@@ -205,14 +205,16 @@ impl Viewport {
         let mut canvas = Canvas::new_transparent(TILE_WIDTH, TILE_HEIGHT);
 
         // rounded corners
-        canvas.write(
-            String::from("\u{256d}  \u{256e}"),
-            color_scheme::SELECTION_STYLE,
-        );
-        canvas.write(
-            String::from("\u{2570}  \u{256f}"),
-            color_scheme::SELECTION_STYLE,
-        );
+        canvas.write(String::from("\u{256d}"), color_scheme::SELECTION_STYLE);
+
+        canvas.set_cursor_position(0, TILE_WIDTH - 1);
+        canvas.write(String::from("\u{256e}"), color_scheme::SELECTION_STYLE);
+
+        canvas.set_cursor_position(TILE_HEIGHT - 1, 0);
+        canvas.write(String::from("\u{2570}"), color_scheme::SELECTION_STYLE);
+
+        canvas.set_cursor_position(TILE_HEIGHT - 1, TILE_WIDTH - 1);
+        canvas.write(String::from("\u{256f}"), color_scheme::SELECTION_STYLE);
 
         canvas
     }
