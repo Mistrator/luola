@@ -9,7 +9,7 @@ use std::collections::HashMap;
 
 const TILE_WIDTH: usize = 2 * TILE_HEIGHT;
 const TILE_HEIGHT: usize = 2;
-const MIN_MARGIN: i32 = 2;
+const MIN_MARGIN: i32 = 1;
 
 pub struct Viewport {
     top_left: GridSquare,
@@ -61,37 +61,20 @@ impl Viewport {
         let new_y = self.selection.y + delta_squares.y;
         let new_x = self.selection.x + delta_squares.x;
 
-        let new_selection = GridSquare { y: new_y, x: new_x };
-        self.selection = new_selection;
-
-        self.fix_viewport_margins();
-    }
-
-    fn fix_viewport_margins(&mut self) {
-        let top_margin = self.selection.y - self.top_left.y;
-        let bottom_margin = (self.top_left.y + (self.height_squares as i32)) - self.selection.y;
-        let left_margin = self.selection.x - self.top_left.x;
-        let right_margin = (self.top_left.x + (self.width_squares as i32)) - self.selection.x;
-
-        let d_top = MIN_MARGIN - top_margin;
-        let d_bottom = MIN_MARGIN - bottom_margin;
-        let d_left = MIN_MARGIN - left_margin;
-        let d_right = MIN_MARGIN - right_margin;
-
-        if d_top > 0 {
-            self.top_left.y -= d_top;
-            self.selection.y += d_top;
-        } else if d_bottom > 0 {
-            self.top_left.y += d_bottom;
-            self.selection.y -= d_bottom;
+        if new_y - MIN_MARGIN < 0 {
+            self.top_left.y += delta_squares.y;
+        } else if new_y + MIN_MARGIN >= (self.height_squares as i32) {
+            self.top_left.y += delta_squares.y;
+        } else {
+            self.selection.y = new_y;
         }
 
-        if d_left > 0 {
-            self.top_left.x -= d_left;
-            self.selection.x += d_left;
-        } else if d_right > 0 {
-            self.top_left.x += d_right;
-            self.selection.x -= d_right;
+        if new_x - MIN_MARGIN < 0 {
+            self.top_left.x += delta_squares.x;
+        } else if new_x + MIN_MARGIN >= (self.width_squares as i32) {
+            self.top_left.x += delta_squares.x;
+        } else {
+            self.selection.x = new_x;
         }
     }
 
