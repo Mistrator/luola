@@ -9,7 +9,7 @@ use luola::item::ItemKind;
 use luola::messages::Message;
 use std::sync::mpsc::Sender;
 
-pub fn move_selection(direction: Direction, ui: &mut UI) {
+pub fn move_selection(direction: Direction, state: &mut GameState) {
     let delta = match direction {
         Direction::Up => GridSquare { y: -1, x: 0 },
         Direction::Down => GridSquare { y: 1, x: 0 },
@@ -17,7 +17,15 @@ pub fn move_selection(direction: Direction, ui: &mut UI) {
         Direction::Right => GridSquare { y: 0, x: 1 },
     };
 
-    ui.viewport.move_selection(delta);
+    state.ui.viewport.move_selection(delta);
+
+    let selected_square = state.ui.viewport.get_selected_world_square();
+    let creatures_at = state.layer.get_creatures_at(selected_square);
+    if !creatures_at.is_empty() {
+        state.ui.set_displayed_creature(creatures_at[0]);
+    } else {
+        state.ui.remove_displayed_creature();
+    }
 }
 
 pub fn select_inventory_slot(slot: usize, ui: &mut UI) {

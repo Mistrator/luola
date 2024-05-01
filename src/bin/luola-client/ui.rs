@@ -22,7 +22,8 @@ pub struct UI {
     pub inventory_info: InventoryInfo,
     pub message_log: MessageLog,
 
-    pub selected_creature: Option<u128>,
+    displayed_creature: Option<u128>,
+    default_displayed_creature: Option<u128>,
 }
 
 impl UI {
@@ -45,7 +46,8 @@ impl UI {
             inventory_info,
             message_log: MessageLog::new(viewport_width - 2, message_log_height - 2),
 
-            selected_creature: None,
+            displayed_creature: None,
+            default_displayed_creature: None,
         }
     }
 
@@ -56,12 +58,16 @@ impl UI {
         let viewport = borders::add_rounded_borders(&viewport, color_scheme::BORDER_STYLE);
         canvas.paste(&viewport, 0, 0);
 
-        let creature_info = self.creature_info.render(self.selected_creature, layer);
+        let creature_info = self
+            .creature_info
+            .render(self.get_displayed_creature(), layer);
         let creature_info =
             borders::add_rounded_borders(&creature_info, color_scheme::BORDER_STYLE);
         canvas.paste(&creature_info, 0, viewport.get_width());
 
-        let inventory_info = self.inventory_info.render(self.selected_creature, layer);
+        let inventory_info = self
+            .inventory_info
+            .render(self.get_displayed_creature(), layer);
         let inventory_info =
             borders::add_rounded_borders(&inventory_info, color_scheme::BORDER_STYLE);
         canvas.paste(
@@ -77,11 +83,22 @@ impl UI {
         canvas
     }
 
-    pub fn select_creature(&mut self, creature_id: u128) {
-        self.selected_creature = Some(creature_id);
+    pub fn get_displayed_creature(&self) -> Option<u128> {
+        if self.displayed_creature.is_some() {
+            return self.displayed_creature;
+        }
+        self.default_displayed_creature
     }
 
-    pub fn deselect_creature(&mut self) {
-        self.selected_creature = None;
+    pub fn set_displayed_creature(&mut self, creature: u128) {
+        self.displayed_creature = Some(creature);
+    }
+
+    pub fn remove_displayed_creature(&mut self) {
+        self.displayed_creature = None;
+    }
+
+    pub fn set_default_displayed_creature(&mut self, creature: u128) {
+        self.default_displayed_creature = Some(creature);
     }
 }

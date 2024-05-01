@@ -59,7 +59,7 @@ pub fn handle_input(
 
     for event in input_events {
         match event {
-            InputEvent::Move(direction) => actions::move_selection(direction, &mut state.ui),
+            InputEvent::Move(direction) => actions::move_selection(direction, state),
             InputEvent::SelectInventorySlot(slot) => {
                 actions::select_inventory_slot(slot, &mut state.ui)
             }
