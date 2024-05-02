@@ -22,7 +22,7 @@ pub fn act(actor: &AI, layer: &Layer) -> Action {
     let all_paths = gridalgos::find_all_shortest_paths(
         &vec![cur_position],
         movement_speed,
-        &layer.grid
+        &layer,
     );
 
     let reachable_squares = gridalgos::get_reachable_squares(&all_paths);

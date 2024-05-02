@@ -134,6 +134,9 @@ pub fn get_player_action(
 
                         let response = Message::ActionError;
                         luola::net::send(&mut player.socket, &response);
+
+                        let error_msg = Message::Info(msg);
+                        luola::net::send(&mut player.socket, &error_msg);
                     }
                 }
             }

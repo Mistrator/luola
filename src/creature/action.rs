@@ -43,7 +43,13 @@ pub fn is_valid(
 
             if !layer.grid.free_square(m.destination) {
                 return Err(MessageType::Error(String::from(
-                    "Move destination square is not empty",
+                    "Move destination square is inside a wall",
+                )));
+            }
+
+            if source != m.destination && !layer.get_creatures_at(m.destination).is_empty() {
+                return Err(MessageType::Error(String::from(
+                    "Move destination square is occupied by a creature",
                 )));
             }
 
@@ -51,7 +57,7 @@ pub fn is_valid(
             let all_paths = gridalgos::find_all_shortest_paths(
                 &vec![source],
                 movement_speed,
-                &layer.grid,
+                &layer,
             );
 
             let shortest_path = gridalgos::get_shortest_path(&all_paths, m.destination);

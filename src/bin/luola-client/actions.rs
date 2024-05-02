@@ -2,7 +2,7 @@ use crate::input::Direction;
 use crate::network;
 use crate::ui::UI;
 use crate::GameState;
-use luola::creature::action::{Action, UseItemAction};
+use luola::creature::action::{Action, MoveAction, UseItemAction};
 use luola::grid::GridSquare;
 use luola::info_message::MessageType;
 use luola::item::ItemKind;
@@ -69,6 +69,16 @@ pub fn use_item(outgoing_tx: &Sender<Message>, state: &mut GameState) {
 
     let cur_action = Action::UseItem(action_details);
     let msg = Message::Act(cur_action);
+
+    network::send_message(outgoing_tx, msg);
+}
+
+pub fn move_creature(outgoing_tx: &Sender<Message>, state: &GameState) {
+    let destination = state.ui.viewport.get_selected_world_square();
+
+    let action_details = MoveAction { destination };
+    let move_action = Action::Move(action_details);
+    let msg = Message::Act(move_action);
 
     network::send_message(outgoing_tx, msg);
 }

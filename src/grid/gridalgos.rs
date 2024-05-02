@@ -1,4 +1,5 @@
 use crate::grid::{Grid, GridSquare};
+use crate::world::Layer;
 use std::cmp;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
@@ -69,7 +70,7 @@ pub struct ShortestPaths {
 pub fn find_all_shortest_paths(
     source: &Vec<GridSquare>,
     max_distance: i32,
-    grid: &Grid,
+    layer: &Layer,
 ) -> ShortestPaths {
     // [0]: even number of diagonals taken so far, next dist 1
     // [1]: odd number of diagonals taken so far, next dist 2
@@ -83,6 +84,12 @@ pub fn find_all_shortest_paths(
     let inf: i32 = 1000000005;
 
     assert!(!source.is_empty());
+
+    let mut creature_positions: HashSet<GridSquare> = HashSet::new();
+
+    for (_, creature) in &layer.creatures {
+        creature_positions.insert(creature.get_position());
+    }
 
     for sq in source.clone() {
         distance[0].insert(sq, 0);
@@ -101,7 +108,13 @@ pub fn find_all_shortest_paths(
 
         let neighbors = get_neighbors(cur_square);
         for nb in neighbors {
-            if !grid.free_square(nb) {
+            // Blocked by a wall
+            if !layer.grid.free_square(nb) {
+                continue;
+            }
+
+            // Blocked by a creature
+            if creature_positions.contains(&nb) {
                 continue;
             }
 

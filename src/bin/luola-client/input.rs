@@ -16,7 +16,8 @@ pub enum Direction {
 
 #[derive(Eq, Ord, PartialEq, PartialOrd)]
 pub enum InputEvent {
-    Move(Direction),
+    MoveSelection(Direction),
+    MoveCreature,
     UseItem,
     SelectInventorySlot(usize),
 }
@@ -59,9 +60,14 @@ pub fn handle_input(
 
     for event in input_events {
         match event {
-            InputEvent::Move(direction) => actions::move_selection(direction, state),
+            InputEvent::MoveSelection(direction) => actions::move_selection(direction, state),
             InputEvent::SelectInventorySlot(slot) => {
                 actions::select_inventory_slot(slot, &mut state.ui)
+            }
+            InputEvent::MoveCreature => {
+                if allowed_to_act(state) {
+                    actions::move_creature(outgoing_tx, state);
+                }
             }
             InputEvent::UseItem => {
                 if allowed_to_act(state) {
@@ -108,11 +114,12 @@ fn poll_input() -> Vec<InputEvent> {
 
     for c in buf.chars() {
         let event = match c {
-            'w' => Some(InputEvent::Move(Direction::Up)),
-            's' => Some(InputEvent::Move(Direction::Down)),
-            'a' => Some(InputEvent::Move(Direction::Left)),
-            'd' => Some(InputEvent::Move(Direction::Right)),
+            'w' => Some(InputEvent::MoveSelection(Direction::Up)),
+            's' => Some(InputEvent::MoveSelection(Direction::Down)),
+            'a' => Some(InputEvent::MoveSelection(Direction::Left)),
+            'd' => Some(InputEvent::MoveSelection(Direction::Right)),
             'q' => Some(InputEvent::UseItem),
+            ' ' => Some(InputEvent::MoveCreature),
             '1'..='9' => {
                 let slot = ((c as u32) - ('1' as u32)) as usize;
                 Some(InputEvent::SelectInventorySlot(slot))
