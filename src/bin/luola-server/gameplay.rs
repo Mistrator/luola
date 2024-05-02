@@ -27,10 +27,10 @@ fn take_creature_turn(
 
     let mut prev_actions: Vec<Action> = Vec::new();
 
-    // todo: take this from creature stats
-    let creature_max_actions = 2;
+    let creature = layer.creatures.get(&creature_id).unwrap();
+    let creature_max_actions = creature.stats.n_actions.get_value(creature.stats.level);
 
-    while prev_actions.len() < creature_max_actions {
+    while (prev_actions.len() as i32) < creature_max_actions {
         let creature = layer.creatures.get(&creature_id).unwrap();
         let c_ai = layer.creature_ai.get(&creature_id).unwrap();
         let cur_action: Action = match c_ai.get_controlling_player_id() {
