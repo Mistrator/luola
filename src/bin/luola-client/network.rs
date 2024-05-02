@@ -64,6 +64,14 @@ fn handle_rx_message(message: Message, outgoing_tx: &Sender<Message>, state: &mu
             let layer = Layer::reconstruct(game_state.grid, game_state.creatures, game_state.items);
             state.layer = layer;
             state.creature_owners = game_state.creature_owners;
+
+            if state.ui.get_default_displayed_creature().is_none() {
+                for (c_id, _) in &state.layer.creatures {
+                    if state.this_player_controls(*c_id) {
+                        state.ui.set_default_displayed_creature(*c_id);
+                    }
+                }
+            }
         }
         Message::Info(msg) => {
             state.ui.message_log.add_message(msg);

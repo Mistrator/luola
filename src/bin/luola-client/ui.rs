@@ -100,6 +100,10 @@ impl UI {
         self.displayed_creature = None;
     }
 
+    pub fn get_default_displayed_creature(&self) -> Option<u128> {
+        self.default_displayed_creature
+    }
+
     pub fn set_default_displayed_creature(&mut self, creature: u128) {
         self.default_displayed_creature = Some(creature);
     }
