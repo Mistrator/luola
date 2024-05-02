@@ -5,12 +5,18 @@ use libc::termios;
 
 use std::mem;
 
+#[cfg(target_os = "windows")]
+use windows::Win32::System::Console::CONSOLE_MODE;
+
 mod ansi_sequences;
 pub mod canvas;
 pub mod color;
 
 #[cfg(target_os = "linux")]
 mod modes_linux;
+
+#[cfg(target_os = "windows")]
+mod modes_windows;
 
 pub mod styled_char;
 
@@ -23,12 +29,24 @@ pub struct Terminal {
 
     #[cfg(target_os = "linux")]
     original_mode: termios,
+
+    #[cfg(target_os = "windows")]
+    original_input_mode: CONSOLE_MODE,
+
+    #[cfg(target_os = "windows")]
+    original_output_mode: CONSOLE_MODE,
 }
 
 impl Terminal {
     pub fn init(width: usize, height: usize) -> Self {
         #[cfg(target_os = "linux")]
         let original_mode = modes_linux::enable_raw_mode();
+
+        #[cfg(target_os = "windows")]
+        let original_input_mode = modes_windows::enable_raw_input_mode();
+
+        #[cfg(target_os = "windows")]
+        let original_output_mode = modes_windows::enable_output_virtual_terminal_processing();
 
         println!("{}", ansi_sequences::use_alternate_screen_buffer());
         println!("{}", ansi_sequences::clear_screen());
@@ -42,6 +60,12 @@ impl Terminal {
 
             #[cfg(target_os = "linux")]
             original_mode,
+
+            #[cfg(target_os = "windows")]
+            original_input_mode,
+
+            #[cfg(target_os = "windows")]
+            original_output_mode,
         }
     }
 
@@ -71,5 +95,11 @@ impl Drop for Terminal {
 
         #[cfg(target_os = "linux")]
         modes_linux::set_mode(&self.original_mode);
+
+        #[cfg(target_os = "windows")]
+        modes_windows::set_input_mode(self.original_input_mode);
+
+        #[cfg(target_os = "windows")]
+        modes_windows::set_output_mode(self.original_output_mode);
     }
 }
