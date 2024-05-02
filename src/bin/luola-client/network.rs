@@ -82,6 +82,7 @@ fn handle_rx_message(message: Message, _outgoing_tx: &Sender<Message>, state: &m
             state.ui.message_log.add_message(info_msg);
 
             state.acting_creature = Some(msg.acting_creature);
+            state.ui.viewport.center_at(creature.get_position());
         }
         Message::ActionOk => (),
         Message::ActionError => (),

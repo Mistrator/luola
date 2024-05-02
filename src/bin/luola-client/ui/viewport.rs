@@ -80,6 +80,20 @@ impl Viewport {
         self.viewport_to_world(self.selection)
     }
 
+    pub fn center_at(&mut self, center: GridSquare) {
+        let corner_y = center.y - (self.height_squares as i32) / 2;
+        let corner_x = center.x - (self.width_squares as i32) / 2;
+
+        self.top_left = GridSquare {
+            y: corner_y,
+            x: corner_x,
+        };
+
+        self.selection = self
+            .world_to_viewport(center)
+            .expect("center should be in viewport because we just centered at it");
+    }
+
     fn width_chars(&self) -> usize {
         TILE_WIDTH * self.width_squares
     }
