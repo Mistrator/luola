@@ -1,3 +1,5 @@
+use std::time::{self, Duration};
+
 const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
 
 pub fn get_version() -> String {
@@ -11,3 +13,6 @@ pub const WORLD_LAYERS: i32 = 10;
 // Smallest possible level. Player characters start at level 1, so this makes it
 // possible to have creatures that are weaker than new player characters.
 pub const MIN_LEVEL: i32 = -1;
+
+pub const AI_ACTION_DELAY: Duration = time::Duration::from_millis(1000);
+pub const TURN_END_DELAY: Duration = time::Duration::from_millis(2000);

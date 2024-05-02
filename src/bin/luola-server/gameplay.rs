@@ -1,5 +1,6 @@
 use crate::messaging;
 use luola::ai;
+use luola::constants;
 use luola::creature::action::{self, Action};
 use luola::creature::perception::{Awareness, Perception};
 use luola::initiative::Initiative;
@@ -7,6 +8,7 @@ use luola::player::Player;
 use luola::world::{Layer, World};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::thread;
 
 #[derive(Deserialize, PartialEq, Serialize)]
 enum GameplayMode {
@@ -41,6 +43,8 @@ fn take_creature_turn(
                 messaging::get_player_action(&mut player, &prev_actions, creature, layer)
             }
             None => {
+                thread::sleep(constants::AI_ACTION_DELAY);
+
                 let ai_action = ai::act(c_ai, layer);
                 if action::is_valid(&ai_action, &prev_actions, creature, layer).is_err() {
                     panic!("AI should not take an invalid action");
@@ -92,6 +96,8 @@ fn take_creature_turn(
             }
         }
     }
+
+    thread::sleep(constants::TURN_END_DELAY);
 
     for (id, _) in &layer.creatures {
         let other_ai = layer.creature_ai.get(&id).unwrap();

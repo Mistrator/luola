@@ -41,10 +41,10 @@ fn main() {
             .magic_attack
             .apply_multiplicative_modifier(2222, 1.2);
 
-        c.stats.reflex_dc.apply_additive_modifier(3333, 2);
+        c.stats.reflex_dc.apply_additive_modifier(3333, -2);
         c.stats.reflex_dc.apply_multiplicative_modifier(4444, 1.4);
 
-        c.stats.movement_speed.apply_additive_modifier(5555, -2);
+        c.stats.movement_speed.apply_additive_modifier(5555, 3);
         c.stats.initiative.apply_multiplicative_modifier(6666, 0.85);
     }
 
