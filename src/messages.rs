@@ -91,7 +91,7 @@ impl GameStateMsg {
     pub fn new(layer: &Layer) -> Self {
         let mut creature_owners: HashMap<u128, CreatureOwner> = HashMap::new();
 
-        for (c_id, creature) in &layer.creatures {
+        for (c_id, _) in &layer.creatures {
             let ai = layer
                 .creature_ai
                 .get(c_id)

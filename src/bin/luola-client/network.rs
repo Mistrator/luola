@@ -58,7 +58,7 @@ fn receive_message(incoming_rx: &Receiver<Message>) -> Message {
         .expect("failed to mpsc-receive incoming message: mpsc sender has disconnected")
 }
 
-fn handle_rx_message(message: Message, outgoing_tx: &Sender<Message>, state: &mut GameState) {
+fn handle_rx_message(message: Message, _outgoing_tx: &Sender<Message>, state: &mut GameState) {
     match message {
         Message::GameState(game_state) => {
             let layer = Layer::reconstruct(game_state.grid, game_state.creatures, game_state.items);

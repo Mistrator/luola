@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 #[derive(Clone, Copy, PartialEq)]
 pub enum Color {
     Black,

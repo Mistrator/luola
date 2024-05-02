@@ -1,4 +1,4 @@
-use crate::grid::{Grid, GridSquare};
+use crate::grid::GridSquare;
 use crate::world::Layer;
 use std::cmp;
 use std::collections::{BinaryHeap, HashMap, HashSet};

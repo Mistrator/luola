@@ -46,7 +46,7 @@ impl Terminal {
     }
 
     pub fn render_next(&mut self) {
-        let current_rendered = self.current_frame.render();
+        let _current_rendered = self.current_frame.render();
         let next_rendered = self.next_frame.render();
 
         // todo: render only characters that differ between current and next frames

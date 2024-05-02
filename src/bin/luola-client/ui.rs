@@ -15,7 +15,6 @@ mod viewport;
 pub struct UI {
     width: usize,
     height: usize,
-    sidebar_width: usize,
 
     pub viewport: Viewport,
     creature_info: CreatureInfo,
@@ -39,7 +38,6 @@ impl UI {
         Self {
             width,
             height,
-            sidebar_width,
 
             viewport: Viewport::new(viewport_width - 2, viewport_height - 2),
             creature_info: CreatureInfo::new(sidebar_width - 2, height / 2 - 2),

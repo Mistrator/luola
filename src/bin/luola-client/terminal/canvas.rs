@@ -1,4 +1,3 @@
-use crate::terminal::color::Color;
 use crate::terminal::styled_char::{Style, StyledChar};
 
 pub struct Canvas {
