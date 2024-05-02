@@ -9,7 +9,7 @@ const BORDER_COLOR: Color = Color::White;
 
 const TEXT_COLOR: Color = Color::White;
 const TEXT_HIGHLIGHT_COLOR: Color = Color::BrightWhite;
-const TEXT_ERROR_COLOR: Color = Color::Yellow;
+const TEXT_ERROR_COLOR: Color = Color::BrightYellow;
 
 const GOOD_MODIFIER_COLOR: Color = Color::Green;
 const BAD_MODIFIER_COLOR: Color = Color::Red;
