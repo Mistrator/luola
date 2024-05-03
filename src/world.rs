@@ -70,11 +70,23 @@ impl Layer {
         self.effects.insert(id, effect);
     }
 
-    pub fn get_creatures_at(&self, square: GridSquare) -> Vec<u128> {
+    pub fn get_living_creatures_at(&self, square: GridSquare) -> Vec<u128> {
         let mut creatures: Vec<u128> = Vec::new();
 
         for (c_id, creature) in &self.creatures {
-            if creature.get_position() == square {
+            if creature.is_alive() && creature.get_position() == square {
+                creatures.push(*c_id);
+            }
+        }
+
+        creatures
+    }
+
+    pub fn get_dead_creatures_at(&self, square: GridSquare) -> Vec<u128> {
+        let mut creatures: Vec<u128> = Vec::new();
+
+        for (c_id, creature) in &self.creatures {
+            if !creature.is_alive() && creature.get_position() == square {
                 creatures.push(*c_id);
             }
         }

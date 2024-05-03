@@ -20,7 +20,7 @@ pub fn move_selection(direction: Direction, state: &mut GameState) {
     state.ui.viewport.move_selection(delta);
 
     let selected_square = state.ui.viewport.get_selected_world_square();
-    let creatures_at = state.layer.get_creatures_at(selected_square);
+    let creatures_at = state.layer.get_living_creatures_at(selected_square);
     if !creatures_at.is_empty() {
         state.ui.set_displayed_creature(creatures_at[0]);
     } else {

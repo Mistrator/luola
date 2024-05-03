@@ -187,12 +187,12 @@ impl Viewport {
         canvas
     }
 
-    fn render_creature(&self, creature: u128, state: &GameState) -> Canvas {
+    fn render_creature(&self, creature_id: u128, state: &GameState) -> Canvas {
         let mut canvas = Canvas::new_transparent(TILE_WIDTH, TILE_HEIGHT);
 
-        let is_some_player = state.some_player_controls(creature);
+        let is_some_player = state.some_player_controls(creature_id);
 
-        let style = if state.acting_creature.is_some_and(|c| c == creature) {
+        let style = if state.acting_creature.is_some_and(|c| c == creature_id) {
             if is_some_player {
                 color_scheme::ACTIVE_PLAYER_CREATURE_STYLE
             } else {
@@ -208,9 +208,16 @@ impl Viewport {
 
         canvas.set_cursor_position(1, 1);
 
-        // "black large circle"
-        // If the space after is removed, the circle is drawn only partially
-        canvas.write(String::from("\u{2b24} "), style);
+        let creature = state.layer.creatures.get(&creature_id).unwrap();
+        let symbol = if creature.is_alive() {
+            // "black large circle"
+            // If the space after is removed, the circle is drawn only partially
+            String::from("\u{2b24} ")
+        } else {
+            String::from("\u{2716}")
+        };
+
+        canvas.write(symbol, style);
 
         canvas
     }

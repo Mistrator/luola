@@ -29,6 +29,10 @@ pub fn is_valid(
     actor: &Creature,
     layer: &Layer,
 ) -> Result<(), MessageType> {
+    if !actor.is_alive() {
+        return Err(MessageType::Error(String::from("Creature is dead")));
+    }
+
     match action {
         Action::Idle => Ok(()),
         Action::Move(m) => {
@@ -47,7 +51,7 @@ pub fn is_valid(
                 )));
             }
 
-            if source != m.destination && !layer.get_creatures_at(m.destination).is_empty() {
+            if source != m.destination && !layer.get_living_creatures_at(m.destination).is_empty() {
                 return Err(MessageType::Error(String::from(
                     "Move destination square is occupied by a creature",
                 )));

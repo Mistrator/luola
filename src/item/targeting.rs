@@ -83,7 +83,7 @@ pub fn get_affected_creatures(targeted_squares: Vec<GridSquare>, layer: &Layer) 
     let mut creatures: Vec<u128> = Vec::new();
 
     for square in targeted_squares {
-        let mut creatures_at_sq = layer.get_creatures_at(square);
+        let mut creatures_at_sq = layer.get_living_creatures_at(square);
         creatures.append(&mut creatures_at_sq);
     }
 

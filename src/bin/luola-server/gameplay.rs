@@ -24,16 +24,24 @@ fn take_creature_turn(
     players: &mut HashMap<u128, Player>,
     gameplay_mode: GameplayMode,
     current_round: i64,
-) -> bool {
+) -> Option<bool> {
+    let creature = layer.creatures.get(&creature_id).unwrap();
+    if !creature.is_alive() {
+        return None;
+    }
+
     messaging::send_turn_start_message(creature_id, players);
 
     let mut prev_actions: Vec<Action> = Vec::new();
-
-    let creature = layer.creatures.get(&creature_id).unwrap();
     let creature_max_actions = creature.stats.n_actions.get_value(creature.stats.level);
 
     while (prev_actions.len() as i32) < creature_max_actions {
         let creature = layer.creatures.get(&creature_id).unwrap();
+
+        if !creature.is_alive() {
+            break;
+        }
+
         let c_ai = layer.creature_ai.get(&creature_id).unwrap();
         let cur_action: Action = match c_ai.get_controlling_player_id() {
             Some(player_id) => {
@@ -85,13 +93,13 @@ fn take_creature_turn(
                         && other_ai.perception.get_awareness() == Awareness::Combat
                     {
                         // A player alerted some non-player creature.
-                        return true;
+                        return Some(true);
                     }
                 }
             } else {
                 if c_ai.perception.get_awareness() == Awareness::Combat {
                     // This non-player creature got alerted.
-                    return true;
+                    return Some(true);
                 }
             }
         }
@@ -105,12 +113,12 @@ fn take_creature_turn(
             && other_ai.perception.get_awareness() == Awareness::Combat
         {
             // Some non-player creature is alerted at the moment.
-            return true;
+            return Some(true);
         }
     }
 
     // No non-player characters are alerted at the moment.
-    return false;
+    return Some(false);
 }
 
 fn run_exploration_round(
@@ -143,7 +151,7 @@ fn run_exploration_round(
             current_round,
         );
 
-        if someone_alerted {
+        if someone_alerted.is_some_and(|x| x) {
             return GameplayMode::Combat;
         }
     }
@@ -163,7 +171,7 @@ fn run_exploration_round(
             current_round,
         );
 
-        if someone_alerted {
+        if someone_alerted.is_some_and(|x| x) {
             wandering_creature_alerted = true;
         }
     }
@@ -193,7 +201,7 @@ fn run_combat_round(
             current_round,
         );
 
-        if !someone_alerted {
+        if someone_alerted.is_some_and(|x| !x) {
             return GameplayMode::Exploration;
         }
     }
@@ -207,7 +215,7 @@ fn run_combat_round(
             GameplayMode::Combat,
             current_round,
         );
-        if !someone_alerted {
+        if someone_alerted.is_some_and(|x| !x) {
             return GameplayMode::Exploration;
         }
     }
